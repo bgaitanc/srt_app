@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   static final _formKey = GlobalKey<FormState>();
 
@@ -19,32 +20,56 @@ class LoginScreen extends StatelessWidget {
               children: [
                 Icon(Icons.lock_outline, size: 64, color: Colors.blueAccent),
                 const SizedBox(height: 24),
-                Text('Iniciar Sesión', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                Text(
+                  'Iniciar Sesión',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 32),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Correo electrónico',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                    prefixIcon: Icon(Icons.email_outlined),
+                SizedBox(
+                  width:
+                      (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
+                      ? double.infinity
+                      : 320,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Correo electrónico',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                  keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                    prefixIcon: Icon(Icons.lock_outline),
+                SizedBox(
+                  width:
+                      (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
+                      ? double.infinity
+                      : 320,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Contraseña',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      prefixIcon: Icon(Icons.lock_outline),
+                    ),
+                    obscureText: true,
                   ),
-                  obscureText: true,
                 ),
                 const SizedBox(height: 24),
                 SizedBox(
-                  width: double.infinity,
+                  width:
+                      (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
+                      ? double.infinity
+                      : 320,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     onPressed: () {},
                     child: Text('Entrar', style: TextStyle(fontSize: 18)),
