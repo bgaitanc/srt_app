@@ -5,6 +5,7 @@ import 'package:srt_app/features/auth/data/datasource/auth_remote_data_source.da
 import 'package:srt_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:srt_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:srt_app/features/auth/domain/usecases/login_user.dart';
+import 'package:srt_app/features/auth/domain/usecases/register_user.dart';
 import 'package:srt_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:srt_app/core/config.dart';
 
@@ -24,7 +25,8 @@ Future<void> init() async {
 
   // UseCase
   sl.registerLazySingleton(() => LoginUser(sl()));
+  sl.registerLazySingleton(() => RegisterUser(sl()));
 
   // Bloc
-  sl.registerFactory(() => AuthBloc(loginUser: sl()));
+  sl.registerFactory(() => AuthBloc(loginUser: sl(), registerUser: sl()));
 }

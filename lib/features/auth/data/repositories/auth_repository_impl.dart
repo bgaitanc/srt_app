@@ -21,4 +21,30 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure('Unexpected error'));
     }
   }
+
+  @override
+  Future<Either<Failure, User>> register({
+    required String nombre,
+    required String apellido,
+    required String usuario,
+    required String correo,
+    required String telefono,
+    required String password,
+  }) async {
+    try {
+      final userModel = await remoteDataSource.register(
+        nombre: nombre,
+        apellido: apellido,
+        usuario: usuario,
+        correo: correo,
+        telefono: telefono,
+        password: password,
+      );
+      return Right(userModel);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error'));
+    }
+  }
 }
