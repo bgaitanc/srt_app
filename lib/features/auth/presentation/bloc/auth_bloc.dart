@@ -18,15 +18,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterRequested>(_onRegisterRequested);
   }
 
-  Future<void> _onLoginRequested(LoginRequested event, Emitter<AuthState> emit) {
-    return _handleAuth(
+  Future<void> _onLoginRequested(
+    LoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    await _handleAuth(
       () => loginUser(LoginParams(event.email, event.password)),
       emit,
     );
   }
 
-  Future<void> _onRegisterRequested(RegisterRequested event, Emitter<AuthState> emit) {
-    return _handleAuth(
+  Future<void> _onRegisterRequested(
+    RegisterRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    await _handleAuth(
       () => registerUser(event.params),
       emit,
     );

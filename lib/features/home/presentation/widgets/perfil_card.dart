@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/styles/app_text_styles.dart';
+import '../../../../core/widgets/info_row.dart';
+import '../../../../core/widgets/primary_button.dart';
 
 class PerfilCard extends StatelessWidget {
   final String usuario;
@@ -33,34 +37,41 @@ class PerfilCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 38,
-                backgroundColor: const Color(0xFF0288D1),
+                backgroundColor: AppConstants.primaryColor,
                 child: Text(
                   usuario.substring(0, 1).toUpperCase(),
-                  style: GoogleFonts.montserrat(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.montserrat(
+                    fontSize: 32,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              const SizedBox(height: 18),
-              Text(nombres + ' ' + apellidos,
-                  style: GoogleFonts.montserrat(fontSize: 22, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 6),
-              Text('@$usuario', style: GoogleFonts.montserrat(fontSize: 15, color: Colors.grey[600])),
-              const SizedBox(height: 18),
-              Divider(height: 1, thickness: 1, color: Colors.grey[300]),
-              const SizedBox(height: 18),
-              _infoRow(Icons.email, correo),
-              const SizedBox(height: 12),
-              _infoRow(Icons.phone, telefono),
-              const SizedBox(height: 12),
-              _infoRow(Icons.calendar_today, 'Miembro desde $miembroDesde'),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.edit),
-                label: const Text('Editar perfil'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0288D1),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+              const SizedBox(height: AppConstants.spacingXLarge),
+              Text(
+                '$nombres $apellidos',
+                style: AppTextStyles.titleLarge(context),
+              ),
+              const SizedBox(height: AppConstants.spacingSmall),
+              Text(
+                '@$usuario',
+                style: AppTextStyles.secondaryText(context),
+              ),
+              const SizedBox(height: AppConstants.spacingXLarge),
+              const Divider(height: 1, thickness: 1, color: Colors.grey),
+              const SizedBox(height: AppConstants.spacingXLarge),
+              InfoRow(icon: Icons.email, value: correo),
+              const SizedBox(height: AppConstants.spacingMedium),
+              InfoRow(icon: Icons.phone, value: telefono),
+              const SizedBox(height: AppConstants.spacingMedium),
+              InfoRow(
+                icon: Icons.calendar_today,
+                value: 'Miembro desde $miembroDesde',
+              ),
+              const SizedBox(height: AppConstants.spacingXXLarge),
+              PrimaryButton(
+                label: 'Editar perfil',
+                icon: Icons.edit,
                 onPressed: () => _showEditModal(context),
               ),
             ],
@@ -95,7 +106,10 @@ class PerfilCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Text('Editar perfil', style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Editar perfil',
+                  style: AppTextStyles.titleMedium(context),
+                ),
               ),
               const SizedBox(height: 18),
               _editField('Nombres', nombresController),
@@ -106,24 +120,16 @@ class PerfilCard extends StatelessWidget {
               const SizedBox(height: 12),
               _editField('Teléfono', telefonoController, keyboardType: TextInputType.phone),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.save),
-                  label: const Text('Guardar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0288D1),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  onPressed: () {
-                    // Aquí iría la lógica para guardar los datos editados
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Perfil actualizado (demo)')),
-                    );
-                  },
-                ),
+              PrimaryButton(
+                label: 'Guardar',
+                icon: Icons.save,
+                isFullWidth: true,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Perfil actualizado (demo)')),
+                  );
+                },
               ),
             ],
           ),
@@ -138,22 +144,16 @@ class PerfilCard extends StatelessWidget {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
       ),
       style: GoogleFonts.montserrat(fontSize: 16),
     );
   }
 
-  Widget _infoRow(IconData icon, String value) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xFF0288D1), size: 22),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(value, style: GoogleFonts.montserrat(fontSize: 16)),
-        ),
-      ],
-    );
-  }
 }
