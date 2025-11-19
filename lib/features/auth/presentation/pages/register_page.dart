@@ -4,6 +4,7 @@ import '../widgets/auth_ui_components.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
+import '../../domain/usecases/register_params.dart';
 import '../bloc/auth_state.dart';
 import '../../../../core/di/injection.dart';
 
@@ -156,12 +157,14 @@ class RegisterPage extends StatelessWidget {
                                   onPressed: () {
                                     context.read<AuthBloc>().add(
                                       RegisterRequested(
-                                        nombre: nombreController.text,
-                                        apellido: apellidoController.text,
-                                        usuario: usuarioController.text,
-                                        correo: correoController.text,
-                                        telefono: telefonoController.text,
-                                        password: passwordController.text,
+                                        RegisterParams(
+                                          nombre: nombreController.text,
+                                          apellido: apellidoController.text,
+                                          usuario: usuarioController.text,
+                                          correo: correoController.text,
+                                          telefono: telefonoController.text,
+                                          password: passwordController.text,
+                                        ),
                                       ),
                                     );
                                   },

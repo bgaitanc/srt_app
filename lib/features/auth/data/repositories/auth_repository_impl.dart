@@ -1,50 +1,23 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasource/auth_remote_data_source.dart';
+import '../../../../core/utils/safe_call.dart';
+import '../../domain/usecases/register_params.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
+  final AuthRemoteDataSource remote;
 
-  AuthRepositoryImpl(this.remoteDataSource);
+  AuthRepositoryImpl(this.remote);
 
   @override
-  Future<Either<Failure, User>> login(String email, String password) async {
-    try {
-      final userModel = await remoteDataSource.login(email, password);
-      return Right(userModel);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Unexpected error'));
-    }
+  Future<Either<Failure, User>> login(String email, String password) {
+    return safeCall(() => remote.login(email, password));
   }
 
   @override
-  Future<Either<Failure, User>> register({
-    required String nombre,
-    required String apellido,
-    required String usuario,
-    required String correo,
-    required String telefono,
-    required String password,
-  }) async {
-    try {
-      final userModel = await remoteDataSource.register(
-        nombre: nombre,
-        apellido: apellido,
-        usuario: usuario,
-        correo: correo,
-        telefono: telefono,
-        password: password,
-      );
-      return Right(userModel);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure('Unexpected error'));
-    }
+  Future<Either<Failure, User>> register(RegisterParams params) {
+    return safeCall(() => remote.register(params));
   }
 }

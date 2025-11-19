@@ -1,3 +1,5 @@
+import '../../domain/usecases/register_params.dart';
+
 abstract class AuthEvent {}
 
 class LoginRequested extends AuthEvent {
@@ -8,19 +10,7 @@ class LoginRequested extends AuthEvent {
 }
 
 class RegisterRequested extends AuthEvent {
-  final String nombre;
-  final String apellido;
-  final String usuario;
-  final String correo;
-  final String telefono;
-  final String password;
+  final RegisterParams params;
 
-  RegisterRequested({
-    required this.nombre,
-    required this.apellido,
-    required this.usuario,
-    required this.correo,
-    required this.telefono,
-    required this.password,
-  });
+  RegisterRequested(this.params);
 }
