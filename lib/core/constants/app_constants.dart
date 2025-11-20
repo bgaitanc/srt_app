@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Constantes globales de la aplicación compartidas entre todos los features
 class AppConstants {
   AppConstants._();
 

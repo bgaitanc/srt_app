@@ -59,18 +59,10 @@ class LoginPage extends StatelessWidget {
                       ),
                       child: BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
-                          if (state is AuthError) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(state.message)),
-                            );
-                          }
                           if (state is AuthAuthenticated) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('¡Login exitoso!')),
-                            );
                             try {
                               Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (_) => HomePage()),
+                                MaterialPageRoute(builder: (_) => const HomePage()),
                               );
                             } catch (e) {
                               debugPrint(

@@ -1,17 +1,22 @@
-class RegisterParams {
-  final String nombre;
-  final String apellido;
-  final String usuario;
-  final String correo;
-  final String telefono;
+import '../entities/base_user_data.dart';
+
+class RegisterParams extends BaseUserData {
   final String password;
 
-  RegisterParams({
-    required this.nombre,
-    required this.apellido,
-    required this.usuario,
-    required this.correo,
-    required this.telefono,
+  const RegisterParams({
+    required super.nombres,
+    required super.apellidos,
+    required super.usuario,
+    required super.correo,
+    required super.telefono,
     required this.password,
   });
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'password': password,
+    };
+  }
 }

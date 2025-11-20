@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:srt_app/core/constants/api_endpoints.dart';
-import 'package:srt_app/features/utils/RemoteDataSourceBase.dart';
+import 'package:srt_app/core/infrastructure/network/remote_data_source_base.dart';
 import 'package:srt_app/core/errors/exceptions.dart';
 import '../../domain/entities/user.dart';
+import '../../domain/entities/user_info.dart';
 import '../../domain/usecases/register_params.dart';
+import '../../../../core/utils/response_helper.dart';
 
 class AuthRemoteDataSource extends RemoteDataSourceBase {
   AuthRemoteDataSource(Dio dio) : super(dio);
@@ -23,8 +25,8 @@ class AuthRemoteDataSource extends RemoteDataSourceBase {
     final response = await safeRequest(() => dio.post(
       ApiEndpoints.register,
       data: {
-        'Nombres': params.nombre,
-        'Apellidos': params.apellido,
+        'Nombres': params.nombres,
+        'Apellidos': params.apellidos,
         'Usuario': params.usuario,
         'Contrasena': params.password,
         'Correo': params.correo,
@@ -35,5 +37,17 @@ class AuthRemoteDataSource extends RemoteDataSourceBase {
       return User.fromJson(response.data);
     }
     throw ServerException('Registro fallido: ${response.statusCode}');
+  }
+
+  Future<UserInfo> getUserInfo() async {
+    final response = await safeRequest(() => dio.get(
+      ApiEndpoints.userInfo,
+    ));
+    
+    return ResponseHelper.extractObject<UserInfo>(
+      response,
+      'data',
+      (json) => UserInfo.fromJson({'data': json}),
+    );
   }
 }

@@ -28,15 +28,7 @@ class RegisterPage extends StatelessWidget {
       create: (_) => sl<AuthBloc>(),
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
           if (state is AuthAuthenticated) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('¡Registro exitoso!')));
             nombreController.clear();
             apellidoController.clear();
             usuarioController.clear();
@@ -158,8 +150,8 @@ class RegisterPage extends StatelessWidget {
                                     context.read<AuthBloc>().add(
                                       RegisterRequested(
                                         RegisterParams(
-                                          nombre: nombreController.text,
-                                          apellido: apellidoController.text,
+                                          nombres: nombreController.text,
+                                          apellidos: apellidoController.text,
                                           usuario: usuarioController.text,
                                           correo: correoController.text,
                                           telefono: telefonoController.text,

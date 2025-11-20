@@ -1,9 +1,13 @@
 class User {
   final String token;
-  User({required this.token});
+  final int usuarioId;
+
+  User({required this.token, required this.usuarioId});
 
   static User fromJson(Map<String, dynamic> json) {
-    final token = json['data']?['token'] ?? '';
-    return User(token: token);
+    final data = json['data'] ?? {};
+    final token = data['token'] ?? '';
+    final usuarioId = data['usuarioId'] ?? 0;
+    return User(token: token, usuarioId: usuarioId);
   }
 }

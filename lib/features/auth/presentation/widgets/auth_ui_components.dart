@@ -74,7 +74,7 @@ class AuthInput extends StatelessWidget {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: GoogleFonts.montserrat(color: Colors.black38, fontSize: 14),
+        hintStyle: const TextStyle(color: Colors.black38),
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(
@@ -82,19 +82,31 @@ class AuthInput extends StatelessWidget {
           horizontal: 12,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-        prefixIcon: Icon(icon, color: const Color(0xFF0288D1), size: 22),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF0288D1), width: 2),
+        ),
+        prefixIcon: Icon(icon, color: const Color(0xFF0288D1)),
         suffixIcon: onVisibilityToggle != null
-            ? GestureDetector(
-                onTap: () => onVisibilityToggle!(!obscureText),
-                child: Icon(
+            ? IconButton(
+                icon: Icon(
                   obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey,
+                  color: const Color(0xFF0288D1),
                 ),
+                onPressed: () => onVisibilityToggle?.call(!obscureText),
               )
             : null,
+      ),
+      style: const TextStyle(
+        color: Colors.black87,
+        fontSize: 16,
       ),
       obscureText: obscureText,
       keyboardType: keyboardType,
