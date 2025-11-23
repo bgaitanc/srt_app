@@ -1,4 +1,5 @@
 import '../../domain/entities/reserva_info_entity.dart';
+import '../../domain/entities/create_reserva_response_entity.dart';
 import '../../../../core/errors/failures.dart';
 
 abstract class ReservasState {
@@ -23,3 +24,16 @@ class ReservasError extends ReservasState {
   const ReservasError(this.failure);
 }
 
+class ReservaCreating extends ReservasState {
+  const ReservaCreating();
+}
+
+class ReservaCreated extends ReservasState {
+  final CreateReservaResponseEntity reserva;
+  const ReservaCreated(this.reserva);
+}
+
+class ReservaCreateError extends ReservasState {
+  final Failure failure;
+  const ReservaCreateError(this.failure);
+}

@@ -6,6 +6,8 @@ class ApiEndpoints {
   
   // Reservation endpoints
   static const String reservasByUser = '/Reservas/user';
+  static const String createReserva = '/Reservas/create';
+  static const String reservaDetalle = '/Reservas/detalle';
   
   // Travels endpoints
   static const String viajes = '/viajes/all';

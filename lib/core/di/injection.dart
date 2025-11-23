@@ -15,6 +15,8 @@ import 'package:srt_app/features/reservations/data/datasource/reservas_remote_da
 import 'package:srt_app/features/reservations/data/repositories/reservas_repository_impl.dart';
 import 'package:srt_app/features/reservations/domain/repositories/reservas_repository.dart';
 import 'package:srt_app/features/reservations/domain/usecases/get_reservas_by_user.dart';
+import 'package:srt_app/features/reservations/domain/usecases/create_reserva.dart';
+import 'package:srt_app/features/reservations/presentation/bloc/reservas_bloc.dart';
 import 'package:srt_app/features/travels/data/datasource/viajes_remote_data_source.dart';
 import 'package:srt_app/features/travels/data/repositories/viajes_repository_impl.dart';
 import 'package:srt_app/features/travels/domain/repositories/viajes_repository.dart';
@@ -87,6 +89,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetUserInfo(sl()));
   sl.registerLazySingleton(() => GetReservasByUser(sl()));
   sl.registerLazySingleton(() => GetViajes(sl()));
+  sl.registerLazySingleton(() => CreateReserva(sl()));
 
   // Bloc
   sl.registerFactory(() => AuthBloc(
@@ -95,6 +98,10 @@ Future<void> init() async {
         getUserInfo: sl(),
       ));
   sl.registerFactory(() => UserInfoBloc(getUserInfo: sl()));
+  sl.registerFactory(() => ReservasBloc(
+        getReservasByUser: sl(),
+        createReserva: sl(),
+      ));
   sl.registerFactory(() => ViajesBloc(sl()));
   sl.registerFactory(() => ThemeBloc());
 }

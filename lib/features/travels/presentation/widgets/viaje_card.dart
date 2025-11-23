@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/viaje_entity.dart';
+import '../../domain/repositories/viajes_repository.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/infrastructure/storage/session_manager.dart';
+import '../../../reservations/presentation/bloc/reservas_bloc.dart';
+import '../../../reservations/presentation/bloc/reservas_event.dart';
+import 'seat_selection_modal.dart';
 
 class ViajeCard extends StatelessWidget {
   final ViajeEntity viaje;
@@ -22,7 +28,7 @@ class ViajeCard extends StatelessWidget {
   }
 
   String _formatCurrency(double amount) {
-    return '₡${amount.toStringAsFixed(2)}';
+    return 'C\$${amount.toStringAsFixed(2)}';
   }
 
   @override
@@ -151,12 +157,7 @@ class ViajeCard extends StatelessWidget {
                   label: 'Reservar',
                   icon: Icons.bookmark,
                   isFullWidth: true,
-                  onPressed: () {
-                    // TODO: Implement reservation
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Función de reserva próximamente')),
-                    );
-                  },
+                  onPressed: () => _handleReservation(context),
                 ),
               ],
             ),
@@ -204,6 +205,78 @@ class ViajeCard extends StatelessWidget {
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  Future<void> _handleReservation(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final repository = sl<ViajesRepository>();
+      final result = await repository.getReservaDetalle(viaje.viajeId);
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      result.fold(
+        (failure) {
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al cargar los asientos: ${failure.message}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        (reservaDetalle) async {
+          // Show seat selection modal
+          if (context.mounted) {
+            // Get ReservasBloc from context (it should be available from HomeScaffold)
+            final reservasBloc = sl<ReservasBloc>();
+            
+            final success = await showModalBottomSheet<bool>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              isDismissible: false,
+              builder: (context) => SizedBox(
+                height: MediaQuery.of(context).size.height * 0.85,
+                child: SeatSelectionModal(
+                  reservaDetalle: reservaDetalle,
+                  viaje: viaje,
+                  reservasBloc: reservasBloc,
+                ),
+              ),
+            );
+
+            if (success == true && context.mounted) {
+              final userId = await SessionManager.getUserId();
+              if (userId != null) {
+                reservasBloc.add(FetchReservas(userId));
+              }
+            }
+          }
+        },
+      );
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error inesperado: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 }

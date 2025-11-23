@@ -3,6 +3,8 @@ import 'package:srt_app/core/errors/failures.dart';
 import 'package:srt_app/core/utils/safe_call.dart';
 import 'package:srt_app/features/reservations/data/datasource/reservas_remote_data_source.dart';
 import '../../domain/entities/reserva_info_entity.dart';
+import '../../domain/entities/create_reserva_request_entity.dart';
+import '../../domain/entities/create_reserva_response_entity.dart';
 import '../../domain/repositories/reservas_repository.dart';
 
 class ReservasRepositoryImpl implements ReservasRepository {
@@ -15,5 +17,11 @@ class ReservasRepositoryImpl implements ReservasRepository {
     int userId,
   ) async {
     return safeCall(() => remoteDataSource.getReservasByUser(userId));
+  }
+
+  @override
+  Future<Either<Failure, CreateReservaResponseEntity>> createReserva(
+      CreateReservaRequestEntity request) async {
+    return safeCall(() => remoteDataSource.createReserva(request));
   }
 }

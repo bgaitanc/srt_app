@@ -7,6 +7,7 @@ import '../../../reservations/presentation/bloc/reservas_bloc.dart';
 import '../../../reservations/presentation/bloc/reservas_event.dart';
 import '../../../reservations/presentation/bloc/reservas_state.dart';
 import '../../../reservations/domain/usecases/get_reservas_by_user.dart';
+import '../../../reservations/domain/usecases/create_reserva.dart';
 import '../../../profile/presentation/widgets/perfil_card.dart';
 import '../../../reservations/presentation/widgets/reserva_card.dart';
 import '../../../travels/presentation/widgets/viaje_card.dart';
@@ -39,7 +40,10 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   @override
   void initState() {
     super.initState();
-    reservasBloc = ReservasBloc(sl<GetReservasByUser>());
+    reservasBloc = ReservasBloc(
+      getReservasByUser: sl<GetReservasByUser>(),
+      createReserva: sl<CreateReserva>(),
+    );
     userInfoBloc = sl<UserInfoBloc>();
     viajesBloc = sl<ViajesBloc>();
     _loadUserIdAndFetchData();

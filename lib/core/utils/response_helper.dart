@@ -64,4 +64,12 @@ class ResponseHelper {
     }
     return [];
   }
+
+  /// Parse a single object from API response (alias for parseObject)
+  static T parseSingle<T>(
+    Map<String, dynamic> response,
+    T Function(Map<String, dynamic>) fromJson,
+  ) {
+    return parseObject(response, fromJson);
+  }
 }
