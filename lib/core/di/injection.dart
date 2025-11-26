@@ -40,7 +40,7 @@ Future<void> init() async {
     PrettyDioLogger(
       requestHeader: true,
       requestBody: true,
-      responseBody: true, // Disable if you have large responses
+      responseBody: true,
       responseHeader: false,
       error: true,
       compact: true,
