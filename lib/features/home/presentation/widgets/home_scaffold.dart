@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:srt_app/core/di/injection.dart';
 import 'topbar.dart';
 import '../../../../core/presentation/navigation/app_drawer.dart';
-import '../../../reservations/presentation/bloc/reservas_bloc.dart';
-import '../../../reservations/presentation/bloc/reservas_event.dart';
-import '../../../reservations/presentation/bloc/reservas_state.dart';
+import '../../../reservations/presentation/bloc/reservation_bloc.dart';
+import '../../../reservations/presentation/bloc/reservations_event.dart';
+import '../../../reservations/presentation/bloc/reservations_state.dart';
 import '../../../reservations/domain/usecases/get_reservas_by_user.dart';
 import '../../../reservations/domain/usecases/create_reserva.dart';
-import '../../../profile/presentation/widgets/perfil_card.dart';
-import '../../../reservations/presentation/widgets/reserva_card.dart';
-import '../../../travels/presentation/widgets/viaje_card.dart';
+import '../../../profile/presentation/widgets/profile_card.dart';
+import '../../../reservations/presentation/widgets/reservation_card.dart';
+import '../../../travels/presentation/widgets/travel_card.dart';
 import '../../../../core/utils/error_message_helper.dart';
 import '../../../../core/infrastructure/storage/session_manager.dart';
 import '../../../profile/presentation/bloc/user_info_bloc.dart';
@@ -18,9 +18,9 @@ import '../../../profile/presentation/bloc/user_info_event.dart';
 import '../../../profile/presentation/bloc/user_info_state.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
 import '../../../../core/theme/bloc/theme_bloc.dart';
-import '../../../travels/presentation/bloc/viajes_bloc.dart';
-import '../../../travels/presentation/bloc/viajes_event.dart';
-import '../../../travels/presentation/bloc/viajes_state.dart';
+import '../../../travels/presentation/bloc/travels_bloc.dart';
+import '../../../travels/presentation/bloc/travels_event.dart';
+import '../../../travels/presentation/bloc/travels_state.dart';
 
 class HomeScaffold extends StatefulWidget {
   const HomeScaffold({super.key});
@@ -32,20 +32,20 @@ class HomeScaffold extends StatefulWidget {
 class _HomeScaffoldState extends State<HomeScaffold> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late ReservasBloc reservasBloc;
+  late ReservationsBloc reservationsBloc;
   late UserInfoBloc userInfoBloc;
-  late ViajesBloc viajesBloc;
-  int? _userId;
+  late TravelsBloc travelsBloc;
+  String? _userId;
 
   @override
   void initState() {
     super.initState();
-    reservasBloc = ReservasBloc(
-      getReservasByUser: sl<GetReservasByUser>(),
-      createReserva: sl<CreateReserva>(),
+    reservationsBloc = ReservationsBloc(
+      getReservationsByUser: sl<GetReservationsByUser>(),
+      createReservation: sl<CreateReservation>(),
     );
     userInfoBloc = sl<UserInfoBloc>();
-    viajesBloc = sl<ViajesBloc>();
+    travelsBloc = sl<TravelsBloc>();
     _loadUserIdAndFetchData();
   }
 
@@ -60,27 +60,27 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     setState(() {
       _userId = userId;
     });
-    reservasBloc.add(FetchReservas(userId));
+    reservationsBloc.add(FetchReservations(userId));
     userInfoBloc.add(const FetchUserInfo());
-    viajesBloc.add(const FetchViajes());
+    travelsBloc.add(const FetchTravels());
   }
 
   @override
   void dispose() {
-    reservasBloc.close();
+    reservationsBloc.close();
     userInfoBloc.close();
-    viajesBloc.close();
+    travelsBloc.close();
     super.dispose();
   }
 
-  Widget _buildViajesPage() {
-    return BlocBuilder<ViajesBloc, ViajesState>(
-      bloc: viajesBloc,
+  Widget _buildTravelsPage() {
+    return BlocBuilder<TravelsBloc, TravelsState>(
+      bloc: travelsBloc,
       builder: (context, state) {
-        if (state is ViajesLoading) {
+        if (state is TravelsLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is ViajesLoaded) {
-          if (state.viajes.isEmpty) {
+        } else if (state is TravelsLoaded) {
+          if (state.travels.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -97,12 +97,12 @@ class _HomeScaffoldState extends State<HomeScaffold> {
           }
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            itemCount: state.viajes.length,
+            itemCount: state.travels.length,
             itemBuilder: (context, index) {
-              return ViajeCard(viaje: state.viajes[index]);
+              return TravelCard(travel: state.travels[index]);
             },
           );
-        } else if (state is ViajesError) {
+        } else if (state is TravelsError) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -115,7 +115,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => viajesBloc.add(const FetchViajes()),
+                  onPressed: () => travelsBloc.add(const FetchTravels()),
                   child: const Text('Reintentar'),
                 ),
               ],
@@ -127,7 +127,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     );
   }
 
-  Widget _buildPerfilPage() {
+  Widget _buildProfilePage() {
     return BlocBuilder<UserInfoBloc, UserInfoState>(
       bloc: userInfoBloc,
       builder: (context, state) {
@@ -135,13 +135,13 @@ class _HomeScaffoldState extends State<HomeScaffold> {
           return const Center(child: CircularProgressIndicator());
         } else if (state is UserInfoLoaded) {
           final userInfo = state.userInfo;
-          return PerfilCard(
-            usuario: userInfo.usuario,
-            nombres: userInfo.nombres,
-            apellidos: userInfo.apellidos,
-            correo: userInfo.correo,
-            telefono: userInfo.telefono,
-            miembroDesde: '16-11-2025', // TODO: Get from backend
+          return ProfileCard(
+            username: userInfo.username,
+            name: userInfo.name,
+            surname: userInfo.surname,
+            email: userInfo.email,
+            phoneNumber: userInfo.phoneNumber,
+            memberSince: '16-11-2025', // TODO: Get from backend
           );
         } else if (state is UserInfoError) {
           return Center(
@@ -169,9 +169,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     setState(() {
       _currentIndex = index;
       if (index == 0 && _userId != null) {
-        reservasBloc.add(FetchReservas(_userId!));
+        reservationsBloc.add(FetchReservations(_userId!));
       } else if (index == 1) {
-        viajesBloc.add(const FetchViajes());
+        travelsBloc.add(const FetchTravels());
       } else if (index == 2) {
         userInfoBloc.add(const FetchUserInfo());
       }
@@ -208,13 +208,13 @@ class _HomeScaffoldState extends State<HomeScaffold> {
         },
       ),
       body: _currentIndex == 0
-          ? BlocBuilder<ReservasBloc, ReservasState>(
-              bloc: reservasBloc,
+          ? BlocBuilder<ReservationsBloc, ReservationsState>(
+              bloc: reservationsBloc,
               builder: (context, state) {
-                if (state is ReservasLoading) {
+                if (state is ReservationsLoading) {
                   return const Center(child: CircularProgressIndicator());
-                } else if (state is ReservasLoaded) {
-                  if (state.reservas.isEmpty) {
+                } else if (state is ReservationsLoaded) {
+                  if (state.reservations.isEmpty) {
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24.0),
@@ -237,7 +237,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Cuando realices una reserva, aparecerá aquí',
+                              'Cuando realices una reservation, aparecerá aquí',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 14,
@@ -251,16 +251,16 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    itemCount: state.reservas.length,
+                    itemCount: state.reservations.length,
                     itemBuilder: (context, index) {
-                      final reserva = state.reservas[index];
-                      return ReservaCard(
-                        estado: 'Completado', // TODO: Map real estado
-                        reserva: reserva,
+                      final reservation = state.reservations[index];
+                      return ReservationCard(
+                        state: 'Completado', // TODO: Map real estado
+                        reservation: reservation,
                       );
                     },
                   );
-                } else if (state is ReservasError) {
+                } else if (state is ReservationsError) {
                   final friendlyMessage = ErrorMessageHelper.getFriendlyMessage(state.failure.message);
                   return Center(
                     child: Padding(
@@ -286,7 +286,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                           if (_userId != null)
                             ElevatedButton.icon(
                               onPressed: () {
-                                reservasBloc.add(FetchReservas(_userId!));
+                                reservationsBloc.add(FetchReservations(_userId!));
                               },
                               icon: const Icon(Icons.refresh),
                               label: const Text('Reintentar'),
@@ -308,8 +308,8 @@ class _HomeScaffoldState extends State<HomeScaffold> {
               },
             )
           : _currentIndex == 1
-              ? _buildViajesPage()
-              : _buildPerfilPage(),
+              ? _buildTravelsPage()
+              : _buildProfilePage(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

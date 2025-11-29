@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../domain/entities/reserva_info_entity.dart';
+import '../../domain/entities/reservation_info_entity.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/styles/app_text_styles.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
-import 'reserva_info_row.dart';
+import 'reservation_info_row.dart';
 import 'ticket_modal.dart';
 
-class ReservaCard extends StatefulWidget {
-  final String estado;
-  final ReservaInfoEntity reserva;
+class ReservationCard extends StatefulWidget {
+  final String state;
+  final ReservationInfoEntity reservation;
 
-  const ReservaCard({
+  const ReservationCard({
     super.key,
-    required this.estado,
-    required this.reserva,
+    required this.state,
+    required this.reservation,
   });
 
   @override
-  State<ReservaCard> createState() => _ReservaCardState();
+  State<ReservationCard> createState() => _ReservationCardState();
 }
 
-class _ReservaCardState extends State<ReservaCard> {
+class _ReservationCardState extends State<ReservationCard> {
   bool _expanded = false;
 
   void _showTicketModal() {
@@ -33,19 +33,19 @@ class _ReservaCardState extends State<ReservaCard> {
           top: Radius.circular(AppConstants.borderRadiusXLarge),
         ),
       ),
-      builder: (context) => TicketModal(reserva: widget.reserva),
+      builder: (context) => TicketModal(reservation: widget.reservation),
     );
   }
 
-  Color get _estadoColor {
-    return widget.estado == 'Completado'
+  Color get _stateColor {
+    return widget.state == 'Completado'
         ? AppConstants.successColor
         : AppConstants.warningColor;
   }
 
   @override
   Widget build(BuildContext context) {
-    final r = widget.reserva;
+    final r = widget.reservation;
 
     return Card(
       margin: const EdgeInsets.symmetric(
@@ -73,14 +73,14 @@ class _ReservaCardState extends State<ReservaCard> {
     );
   }
 
-  Widget _buildHeader(ReservaInfoEntity r) {
+  Widget _buildHeader(ReservationInfoEntity r) {
     return Row(
       children: [
         _buildEstadoBadge(),
         const SizedBox(width: 14),
         Flexible(
           child: Text(
-            'ID: ${r.reservaId}',
+            'ID: ${r.reservationId}',
             style: GoogleFonts.montserrat(
               fontWeight: FontWeight.w500,
               fontSize: 13,
@@ -106,13 +106,13 @@ class _ReservaCardState extends State<ReservaCard> {
         vertical: AppConstants.spacingSmall,
       ),
       decoration: BoxDecoration(
-        color: _estadoColor.withValues(alpha: 0.15),
+        color: _stateColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
       ),
       child: Text(
-        widget.estado,
+        widget.state,
         style: GoogleFonts.montserrat(
-          color: _estadoColor,
+          color: _stateColor,
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
@@ -120,19 +120,19 @@ class _ReservaCardState extends State<ReservaCard> {
     );
   }
 
-  Widget _buildMainInfo(ReservaInfoEntity r) {
+  Widget _buildMainInfo(ReservationInfoEntity r) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${r.origen} → ${r.destino}',
+          '${r.originDestination} → ${r.finalDestination}',
           style: AppTextStyles.bodyLarge(context),
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 10),
         ReservaInfoRow(
           label: 'Salida',
-          value: r.fechaSalida,
+          value: r.departureDate,
           icon: Icons.calendar_today,
           fontSize: 13,
         ),
@@ -142,7 +142,7 @@ class _ReservaCardState extends State<ReservaCard> {
             Expanded(
               child: ReservaInfoRow(
                 label: 'Asientos',
-                value: r.asientos.join(', '),
+                value: r.seats.join(', '),
                 icon: Icons.event_seat,
                 fontSize: 13,
               ),
@@ -162,7 +162,7 @@ class _ReservaCardState extends State<ReservaCard> {
     );
   }
 
-  Widget _buildExpandedInfo(ReservaInfoEntity r) {
+  Widget _buildExpandedInfo(ReservationInfoEntity r) {
     return Padding(
       padding: const EdgeInsets.only(top: AppConstants.spacingLarge),
       child: Column(
@@ -173,7 +173,7 @@ class _ReservaCardState extends State<ReservaCard> {
               Expanded(
                 child: ReservaInfoRow(
                   label: 'Salida',
-                  value: r.fechaSalida,
+                  value: r.departureDate,
                   icon: Icons.calendar_today,
                   fontSize: 13,
                 ),
@@ -182,7 +182,7 @@ class _ReservaCardState extends State<ReservaCard> {
               Expanded(
                 child: ReservaInfoRow(
                   label: 'Llegada',
-                  value: r.fechaLlegada,
+                  value: r.arrivalDate,
                   icon: Icons.calendar_today,
                   fontSize: 13,
                 ),
@@ -192,21 +192,21 @@ class _ReservaCardState extends State<ReservaCard> {
           const SizedBox(height: AppConstants.spacingMedium),
           ReservaInfoRow(
             label: 'Transporte',
-            value: r.tipoTransporte,
+            value: r.vehicleType,
             icon: Icons.directions_bus,
             fontSize: 14,
           ),
           const SizedBox(height: AppConstants.spacingSmall),
           ReservaInfoRow(
             label: 'Vehículo',
-            value: r.vehiculo,
+            value: r.vehicle,
             icon: Icons.directions_car,
             fontSize: 14,
           ),
           const SizedBox(height: AppConstants.spacingSmall),
           ReservaInfoRow(
             label: 'Modelo, Marca',
-            value: '${r.modelo}, ${r.marca}',
+            value: '${r.model}, ${r.brand}',
             icon: Icons.info_outline,
             fontSize: 14,
           ),

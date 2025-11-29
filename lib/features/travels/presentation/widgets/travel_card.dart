@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../domain/entities/viaje_entity.dart';
-import '../../domain/repositories/viajes_repository.dart';
+import '../../domain/entities/travel_entity.dart';
+import '../../domain/repositories/travels_repository.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/infrastructure/storage/session_manager.dart';
-import '../../../reservations/presentation/bloc/reservas_bloc.dart';
-import '../../../reservations/presentation/bloc/reservas_event.dart';
+import '../../../reservations/presentation/bloc/reservation_bloc.dart';
+import '../../../reservations/presentation/bloc/reservations_event.dart';
 import 'seat_selection_modal.dart';
 
-class ViajeCard extends StatelessWidget {
-  final ViajeEntity viaje;
+class TravelCard extends StatelessWidget {
+  final TravelEntity travel;
 
-  const ViajeCard({
+  const TravelCard({
     super.key,
-    required this.viaje,
+    required this.travel,
   });
 
   String _formatDateTime(String dateTimeStr) {
@@ -62,7 +62,7 @@ class ViajeCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        viaje.locacionOrigen,
+                        travel.originDestination,
                         style: GoogleFonts.montserrat(
                           color: Colors.white,
                           fontSize: 16,
@@ -78,7 +78,7 @@ class ViajeCard extends StatelessWidget {
                     const Icon(Icons.arrow_downward, color: Colors.white70, size: 16),
                     const SizedBox(width: 8),
                     Text(
-                      '${viaje.distanciaKM} km',
+                      '${travel.distanceInKm} km',
                       style: GoogleFonts.montserrat(
                         color: Colors.white70,
                         fontSize: 12,
@@ -93,7 +93,7 @@ class ViajeCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        viaje.locacionDestino,
+                        travel.finalDestination,
                         style: GoogleFonts.montserrat(
                           color: Colors.white,
                           fontSize: 16,
@@ -112,15 +112,15 @@ class ViajeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow(Icons.access_time, 'Salida', _formatDateTime(viaje.fechaHoraSalida)),
+                _buildInfoRow(Icons.access_time, 'Salida', _formatDateTime(travel.departureDate)),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.schedule, 'Llegada', _formatDateTime(viaje.fechaHoraLlegada)),
+                _buildInfoRow(Icons.schedule, 'Llegada', _formatDateTime(travel.arrivalDate)),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.directions_bus, 'Vehículo', '${viaje.modelo} (${viaje.placa})'),
+                _buildInfoRow(Icons.directions_bus, 'Vehículo', '${travel.model} (${travel.registrationPlate})'),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.event_seat, 'Capacidad', '${viaje.capacidad} asientos'),
+                _buildInfoRow(Icons.event_seat, 'Capacidad', '${travel.capacity} asientos'),
                 const SizedBox(height: 8),
-                _buildInfoRow(Icons.person, 'Conductor', '${viaje.conductorNombres} ${viaje.conductorApellidos}'),
+                _buildInfoRow(Icons.person, 'Conductor', '${travel.driverName} ${travel.driverSurname}'),
                 const SizedBox(height: 12),
                 
                 Row(
@@ -129,11 +129,11 @@ class ViajeCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(viaje.estado),
+                        color: _getStatusColor(travel.status),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        viaje.estado,
+                        travel.status,
                         style: GoogleFonts.montserrat(
                           color: Colors.white,
                           fontSize: 12,
@@ -142,7 +142,7 @@ class ViajeCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _formatCurrency(viaje.costo),
+                      _formatCurrency(travel.price),
                       style: GoogleFonts.montserrat(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -218,8 +218,8 @@ class ViajeCard extends StatelessWidget {
     );
 
     try {
-      final repository = sl<ViajesRepository>();
-      final result = await repository.getReservaDetalle(viaje.viajeId);
+      final repository = sl<TravelsRepository>();
+      final result = await repository.getReservationDetail(travel.travelId);
 
       if (context.mounted) {
         Navigator.of(context).pop();
@@ -237,11 +237,11 @@ class ViajeCard extends StatelessWidget {
             );
           }
         },
-        (reservaDetalle) async {
+        (reservationDetail) async {
           // Show seat selection modal
           if (context.mounted) {
             // Get ReservasBloc from context (it should be available from HomeScaffold)
-            final reservasBloc = sl<ReservasBloc>();
+            final reservationsBloc = sl<ReservationsBloc>();
             
             final success = await showModalBottomSheet<bool>(
               context: context,
@@ -251,9 +251,9 @@ class ViajeCard extends StatelessWidget {
               builder: (context) => SizedBox(
                 height: MediaQuery.of(context).size.height * 0.85,
                 child: SeatSelectionModal(
-                  reservaDetalle: reservaDetalle,
-                  viaje: viaje,
-                  reservasBloc: reservasBloc,
+                  reservationDetail: reservationDetail,
+                  travel: travel,
+                  reservationsBloc: reservationsBloc,
                 ),
               ),
             );
@@ -261,7 +261,7 @@ class ViajeCard extends StatelessWidget {
             if (success == true && context.mounted) {
               final userId = await SessionManager.getUserId();
               if (userId != null) {
-                reservasBloc.add(FetchReservas(userId));
+                reservationsBloc.add(FetchReservations(userId));
               }
             }
           }

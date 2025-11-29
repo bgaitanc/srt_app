@@ -2,34 +2,31 @@ import 'base_user_data.dart';
 import '../../../../core/utils/json_parser_helper.dart';
 
 class UserInfo extends BaseUserData {
-  final int usuarioId;
+  final String userId;
 
   const UserInfo({
-    required this.usuarioId,
-    required super.nombres,
-    required super.apellidos,
-    required super.usuario,
-    required super.correo,
-    required super.telefono,
+    required this.userId,
+    required super.name,
+    required super.surname,
+    required super.username,
+    required super.email,
+    required super.phoneNumber,
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
     final data = JsonParserHelper.getNestedMap(json, 'data');
     return UserInfo(
-      usuarioId: JsonParserHelper.getValueOrDefault(data, 'usuarioId', 0),
-      nombres: JsonParserHelper.getValueOrDefault(data, 'nombres', ''),
-      apellidos: JsonParserHelper.getValueOrDefault(data, 'apellidos', ''),
-      usuario: JsonParserHelper.getValueOrDefault(data, 'usuario', ''),
-      correo: JsonParserHelper.getValueOrDefault(data, 'correo', ''),
-      telefono: JsonParserHelper.getValueOrDefault(data, 'telefono', ''),
+      userId: JsonParserHelper.getValueOrDefault(data, 'id', ''),
+      name: JsonParserHelper.getValueOrDefault(data, 'name', ''),
+      surname: JsonParserHelper.getValueOrDefault(data, 'surname', ''),
+      username: JsonParserHelper.getValueOrDefault(data, 'username', ''),
+      email: JsonParserHelper.getValueOrDefault(data, 'email', ''),
+      phoneNumber: JsonParserHelper.getValueOrDefault(data, 'phoneNumber', ''),
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'usuarioId': usuarioId,
-      ...super.toJson(),
-    };
+    return {'userId': userId, ...super.toJson()};
   }
 }

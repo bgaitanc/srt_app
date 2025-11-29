@@ -1,5 +1,5 @@
-class GetReservasParams {
-  final int userId;
-  const GetReservasParams(this.userId);
+class GetReservationsParams {
+  final String userId;
+  const GetReservationsParams(this.userId);
 }
 

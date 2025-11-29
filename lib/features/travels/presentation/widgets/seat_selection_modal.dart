@@ -1,25 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../domain/entities/reserva_detalle_entity.dart';
-import '../../domain/entities/viaje_entity.dart';
+import '../../domain/entities/reservation_detail_entity.dart';
+import '../../domain/entities/travel_entity.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
 import '../../../../core/infrastructure/storage/session_manager.dart';
-import '../../../reservations/domain/entities/create_reserva_request_entity.dart';
-import '../../../reservations/presentation/bloc/reservas_bloc.dart';
-import '../../../reservations/presentation/bloc/reservas_event.dart';
-import '../../../reservations/presentation/bloc/reservas_state.dart';
+import '../../../reservations/domain/entities/create_reservation_request_entity.dart';
+import '../../../reservations/presentation/bloc/reservation_bloc.dart';
+import '../../../reservations/presentation/bloc/reservations_event.dart';
+import '../../../reservations/presentation/bloc/reservations_state.dart';
 
 class SeatSelectionModal extends StatefulWidget {
-  final ReservaDetalleEntity reservaDetalle;
-  final ViajeEntity viaje;
-  final ReservasBloc reservasBloc;
+  final ReservationDetailEntity reservationDetail;
+  final TravelEntity travel;
+  final ReservationsBloc reservationsBloc;
 
   const SeatSelectionModal({
     super.key,
-    required this.reservaDetalle,
-    required this.viaje,
-    required this.reservasBloc,
+    required this.reservationDetail,
+    required this.travel,
+    required this.reservationsBloc,
   });
 
   @override
@@ -31,7 +30,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
   bool _isCreating = false;
 
   bool _isSeatReserved(int seatNumber) {
-    return widget.reservaDetalle.asientosReservados.contains(seatNumber);
+    return widget.reservationDetail.reservedSeats.contains(seatNumber);
   }
 
   bool _isSeatSelected(int seatNumber) {
@@ -51,7 +50,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
   }
 
   double _calculateTotal() {
-    return _selectedSeats.length * widget.viaje.costo;
+    return _selectedSeats.length * widget.travel.price;
   }
 
   Future<void> _confirmReservation() async {
@@ -78,23 +77,23 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
       return;
     }
 
-    final request = CreateReservaRequestEntity(
-      viajeId: widget.viaje.viajeId,
-      asientos: _selectedSeats.toList()..sort(),
-      usuarioId: userId,
+    final request = CreateReservationRequestEntity(
+      travelId: widget.travel.travelId,
+      seats: _selectedSeats.toList()..sort(),
+      userId: userId,
     );
 
-    widget.reservasBloc.add(CreateReservaEvent(request));
+    widget.reservationsBloc.add(CreateReservationEvent(request));
 
     // Listen for the result
-    await for (final state in widget.reservasBloc.stream) {
-      if (state is ReservaCreated) {
+    await for (final state in widget.reservationsBloc.stream) {
+      if (state is ReservationCreated) {
         if (mounted) {
           Navigator.of(context).pop(true); // Return true to indicate success
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '¡Reserva creada exitosamente! Asientos: ${request.asientos.join(", ")}',
+                '¡Reserva creada exitosamente! Asientos: ${request.seats.join(", ")}',
               ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
@@ -102,7 +101,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
           );
         }
         break;
-      } else if (state is ReservaCreateError) {
+      } else if (state is ReservationCreateError) {
         if (mounted) {
           setState(() {
             _isCreating = false;
@@ -209,7 +208,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  widget.viaje.locacionOrigen,
+                  widget.travel.originDestination,
                   style: GoogleFonts.montserrat(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -225,7 +224,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  widget.viaje.locacionDestino,
+                  widget.travel.finalDestination,
                   style: GoogleFonts.montserrat(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -272,7 +271,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
 
   Widget _buildSeatGrid() {
     final seatsPerRow = 4;
-    final rows = (widget.reservaDetalle.capacidad / seatsPerRow).ceil();
+    final rows = (widget.reservationDetail.capacity / seatsPerRow).ceil();
 
     return Column(
       children: List.generate(rows, (rowIndex) {
@@ -282,7 +281,7 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(seatsPerRow, (colIndex) {
               final seatNumber = rowIndex * seatsPerRow + colIndex + 1;
-              if (seatNumber > widget.reservaDetalle.capacidad) {
+              if (seatNumber > widget.reservationDetail.capacity) {
                 return const SizedBox(width: 60, height: 60);
               }
               return _buildSeat(seatNumber);
