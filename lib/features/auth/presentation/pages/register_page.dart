@@ -13,11 +13,11 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nombreController = TextEditingController();
-    final apellidoController = TextEditingController();
-    final usuarioController = TextEditingController();
-    final correoController = TextEditingController();
-    final telefonoController = TextEditingController();
+    final nameController = TextEditingController();
+    final surnameController = TextEditingController();
+    final usernameController = TextEditingController();
+    final emailController = TextEditingController();
+    final phoneNumberController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmController = TextEditingController();
     final ValueNotifier<bool> passwordObscure = ValueNotifier(true);
@@ -29,11 +29,11 @@ class RegisterPage extends StatelessWidget {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            nombreController.clear();
-            apellidoController.clear();
-            usuarioController.clear();
-            correoController.clear();
-            telefonoController.clear();
+            nameController.clear();
+            surnameController.clear();
+            usernameController.clear();
+            emailController.clear();
+            phoneNumberController.clear();
             passwordController.clear();
             confirmController.clear();
             Navigator.of(context).pop();
@@ -84,35 +84,35 @@ class RegisterPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 22),
                           AuthInput(
-                            controller: nombreController,
+                            controller: nameController,
                             hintText: 'Nombre',
                             icon: Icons.person,
                             keyboardType: TextInputType.name,
                           ),
                           const SizedBox(height: 10),
                           AuthInput(
-                            controller: apellidoController,
+                            controller: surnameController,
                             hintText: 'Apellido',
                             icon: Icons.person_outline,
                             keyboardType: TextInputType.name,
                           ),
                           const SizedBox(height: 10),
                           AuthInput(
-                            controller: usuarioController,
+                            controller: usernameController,
                             hintText: 'Usuario',
                             icon: Icons.account_circle_outlined,
                             keyboardType: TextInputType.text,
                           ),
                           const SizedBox(height: 10),
                           AuthInput(
-                            controller: correoController,
+                            controller: emailController,
                             hintText: 'Correo electrónico',
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                           ),
                           const SizedBox(height: 10),
                           AuthInput(
-                            controller: telefonoController,
+                            controller: phoneNumberController,
                             hintText: 'Teléfono',
                             icon: Icons.phone_outlined,
                             keyboardType: TextInputType.phone,
@@ -150,11 +150,11 @@ class RegisterPage extends StatelessWidget {
                                     context.read<AuthBloc>().add(
                                       RegisterRequested(
                                         RegisterParams(
-                                          nombres: nombreController.text,
-                                          apellidos: apellidoController.text,
-                                          usuario: usuarioController.text,
-                                          correo: correoController.text,
-                                          telefono: telefonoController.text,
+                                          name: nameController.text,
+                                          surname: surnameController.text,
+                                          username: usernameController.text,
+                                          email: emailController.text,
+                                          phoneNumber: phoneNumberController.text,
                                           password: passwordController.text,
                                         ),
                                       ),

@@ -3,15 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/styles/app_text_styles.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
-import '../../domain/entities/reserva_info_entity.dart';
-import 'reserva_info_row.dart';
+import '../../domain/entities/reservation_info_entity.dart';
+import 'reservation_info_row.dart';
 
 class TicketModal extends StatelessWidget {
-  final ReservaInfoEntity reserva;
+  final ReservationInfoEntity reservation;
 
   const TicketModal({
     super.key,
-    required this.reserva,
+    required this.reservation,
   });
 
   @override
@@ -83,7 +83,7 @@ class TicketModal extends StatelessWidget {
             ),
             const SizedBox(height: AppConstants.spacingMedium),
             Text(
-              'Reserva #${reserva.reservaId}',
+              'Reserva #${reservation.reservationId}',
               style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.w600,
               ),
@@ -98,55 +98,55 @@ class TicketModal extends StatelessWidget {
     return [
       ReservaInfoRow(
         label: 'Asientos',
-        value: reserva.asientos.join(', '),
+        value: reservation.seats.join(', '),
         icon: Icons.event_seat,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Origen',
-        value: reserva.origen,
+        value: reservation.originDestination,
         icon: Icons.location_on,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Destino',
-        value: reserva.destino,
+        value: reservation.finalDestination,
         icon: Icons.flag,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Salida',
-        value: reserva.fechaSalida,
+        value: reservation.departureDate,
         icon: Icons.calendar_today,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Llegada',
-        value: reserva.fechaLlegada,
+        value: reservation.arrivalDate,
         icon: Icons.calendar_today,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Transporte',
-        value: reserva.tipoTransporte,
+        value: reservation.vehicleType,
         icon: Icons.directions_bus,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Vehículo',
-        value: reserva.vehiculo,
+        value: reservation.vehicle,
         icon: Icons.directions_car,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Modelo',
-        value: reserva.modelo,
+        value: reservation.model,
         icon: Icons.car_repair,
       ),
       const SizedBox(height: AppConstants.spacingSmall),
       ReservaInfoRow(
         label: 'Marca',
-        value: reserva.marca,
+        value: reservation.brand,
         icon: Icons.branding_watermark,
       ),
     ];
@@ -164,7 +164,7 @@ class TicketModal extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          reserva.total.toStringAsFixed(2),
+          reservation.total.toStringAsFixed(2),
           style: AppTextStyles.priceLarge(context),
         ),
       ],

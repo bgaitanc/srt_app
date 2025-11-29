@@ -58,16 +58,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
       (user) async {
         await SessionManager.saveToken(user.token);
+        await SessionManager.saveRefreshToken(user.refreshToken);
         final userInfoResult = await getUserInfo(NoParams());
         
         await userInfoResult.fold(
           (failure) async {
-            await SessionManager.saveUserId(user.usuarioId);
+            await SessionManager.saveUserId(user.userId);
             emit(AuthAuthenticated(user));
           },
           (userInfo) async {
-            await SessionManager.saveUserId(userInfo.usuarioId);
-            emit(AuthAuthenticated(user));
+            final localUser = User(
+              token: user.token,
+              refreshToken: user.refreshToken,
+              userId: userInfo.userId,
+            );
+
+            await SessionManager.saveUserId(userInfo.userId);
+            emit(AuthAuthenticated(localUser));
           },
         );
       },

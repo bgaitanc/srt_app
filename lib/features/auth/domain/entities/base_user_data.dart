@@ -1,25 +1,25 @@
 class BaseUserData {
-  final String nombres;
-  final String apellidos;
-  final String usuario;
-  final String correo;
-  final String telefono;
+  final String name;
+  final String surname;
+  final String username;
+  final String email;
+  final String phoneNumber;
 
   const BaseUserData({
-    required this.nombres,
-    required this.apellidos,
-    required this.usuario,
-    required this.correo,
-    required this.telefono,
+    required this.name,
+    required this.surname,
+    required this.username,
+    required this.email,
+    required this.phoneNumber,
   });
 
   Map<String, dynamic> toJson() {
     return {
-      'nombres': nombres,
-      'apellidos': apellidos,
-      'usuario': usuario,
-      'correo': correo,
-      'telefono': telefono,
+      'name': name,
+      'surname': surname,
+      'username': username,
+      'email': email,
+      'phoneNumber': phoneNumber,
     };
   }
 }

@@ -1,27 +1,27 @@
 import 'package:dartz/dartz.dart';
 import 'package:srt_app/core/errors/failures.dart';
 import 'package:srt_app/core/utils/safe_call.dart';
-import 'package:srt_app/features/reservations/data/datasource/reservas_remote_data_source.dart';
-import '../../domain/entities/reserva_info_entity.dart';
-import '../../domain/entities/create_reserva_request_entity.dart';
-import '../../domain/entities/create_reserva_response_entity.dart';
+import 'package:srt_app/features/reservations/data/datasource/reservations_remote_data_source.dart';
+import '../../domain/entities/reservation_info_entity.dart';
+import '../../domain/entities/create_reservation_request_entity.dart';
+import '../../domain/entities/create_reservation_response_entity.dart';
 import '../../domain/repositories/reservas_repository.dart';
 
 class ReservasRepositoryImpl implements ReservasRepository {
-  final ReservasRemoteDataSource remoteDataSource;
+  final ReservationsRemoteDataSource remoteDataSource;
 
   ReservasRepositoryImpl(this.remoteDataSource);
 
   @override
-  Future<Either<Failure, List<ReservaInfoEntity>>> getReservasByUser(
-    int userId,
+  Future<Either<Failure, List<ReservationInfoEntity>>> getReservasByUser(
+    String userId,
   ) async {
-    return safeCall(() => remoteDataSource.getReservasByUser(userId));
+    return safeCall(() => remoteDataSource.getReservationsByUser(userId));
   }
 
   @override
-  Future<Either<Failure, CreateReservaResponseEntity>> createReserva(
-      CreateReservaRequestEntity request) async {
-    return safeCall(() => remoteDataSource.createReserva(request));
+  Future<Either<Failure, CreateReservationResponseEntity>> createReserva(
+      CreateReservationRequestEntity request) async {
+    return safeCall(() => remoteDataSource.createReservation(request));
   }
 }

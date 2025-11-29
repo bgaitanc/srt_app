@@ -8,7 +8,7 @@ import '../../../routes.dart';
 class HttpResponseInterceptor extends Interceptor {
   // Endpoints to exclude from showing toasts
   final List<String> _excludedEndpoints = [
-    '/Users/info',
+    '/users/info',
   ];
 
   @override

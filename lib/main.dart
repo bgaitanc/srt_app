@@ -16,7 +16,7 @@ Future<void> main() async {
     final initialRoute = token == null ? Routes.login : Routes.home;
     
     runApp(MyApp(initialRoute: initialRoute));
-  } catch (e, stack) {
+  } catch (e) {
     runApp(MaterialApp(
       home: Scaffold(
         body: Center(

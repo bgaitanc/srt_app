@@ -5,22 +5,22 @@ import '../../../../core/styles/app_text_styles.dart';
 import '../../../../core/presentation/widgets/cards/info_row.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
 
-class PerfilCard extends StatelessWidget {
-  final String usuario;
-  final String nombres;
-  final String apellidos;
-  final String correo;
-  final String telefono;
-  final String miembroDesde;
+class ProfileCard extends StatelessWidget {
+  final String username;
+  final String name;
+  final String surname;
+  final String email;
+  final String phoneNumber;
+  final String memberSince;
 
-  const PerfilCard({
+  const ProfileCard({
     super.key,
-    required this.usuario,
-    required this.nombres,
-    required this.apellidos,
-    required this.correo,
-    required this.telefono,
-    required this.miembroDesde,
+    required this.username,
+    required this.name,
+    required this.surname,
+    required this.email,
+    required this.phoneNumber,
+    required this.memberSince,
   });
 
   @override
@@ -39,7 +39,7 @@ class PerfilCard extends StatelessWidget {
                 radius: 38,
                 backgroundColor: AppConstants.primaryColor,
                 child: Text(
-                  usuario.substring(0, 1).toUpperCase(),
+                  username.substring(0, 1).toUpperCase(),
                   style: GoogleFonts.montserrat(
                     fontSize: 32,
                     color: Colors.white,
@@ -48,28 +48,22 @@ class PerfilCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppConstants.spacingXLarge),
-              Text(
-                '$nombres $apellidos',
-                style: AppTextStyles.titleLarge(context),
-              ),
+              Text('$name $surname', style: AppTextStyles.titleLarge(context)),
               const SizedBox(height: AppConstants.spacingSmall),
-              Text(
-                '@$usuario',
-                style: AppTextStyles.secondaryText(context),
-              ),
+              Text('@$username', style: AppTextStyles.secondaryText(context)),
               const SizedBox(height: AppConstants.spacingXLarge),
               const Divider(height: 1, thickness: 1, color: Colors.grey),
               const SizedBox(height: 16),
-              InfoRow(icon: Icons.person, label: 'Usuario', value: usuario),
+              InfoRow(icon: Icons.person, label: 'Usuario', value: username),
               const SizedBox(height: 8),
-              InfoRow(icon: Icons.email, label: 'Correo', value: correo),
+              InfoRow(icon: Icons.email, label: 'Correo', value: email),
               const SizedBox(height: 8),
-              InfoRow(icon: Icons.phone, label: 'Teléfono', value: telefono),
+              InfoRow(icon: Icons.phone, label: 'Teléfono', value: phoneNumber),
               const SizedBox(height: 24),
               InfoRow(
                 icon: Icons.calendar_today,
                 label: 'Miembro desde',
-                value: miembroDesde,
+                value: memberSince,
               ),
               const SizedBox(height: AppConstants.spacingXXLarge),
               PrimaryButton(
@@ -85,10 +79,10 @@ class PerfilCard extends StatelessWidget {
   }
 
   void _showEditModal(BuildContext context) {
-    final nombresController = TextEditingController(text: nombres);
-    final apellidosController = TextEditingController(text: apellidos);
-    final correoController = TextEditingController(text: correo);
-    final telefonoController = TextEditingController(text: telefono);
+    final nameController = TextEditingController(text: name);
+    final surnameController = TextEditingController(text: surname);
+    final emailController = TextEditingController(text: email);
+    final phoneNumberController = TextEditingController(text: phoneNumber);
 
     showModalBottomSheet(
       context: context,
@@ -115,13 +109,21 @@ class PerfilCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              _editField('Nombres', nombresController),
+              _editField('Nombres', nameController),
               const SizedBox(height: 12),
-              _editField('Apellidos', apellidosController),
+              _editField('Apellidos', surnameController),
               const SizedBox(height: 12),
-              _editField('Correo', correoController, keyboardType: TextInputType.emailAddress),
+              _editField(
+                'Correo',
+                emailController,
+                keyboardType: TextInputType.emailAddress,
+              ),
               const SizedBox(height: 12),
-              _editField('Teléfono', telefonoController, keyboardType: TextInputType.phone),
+              _editField(
+                'Teléfono',
+                phoneNumberController,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: 24),
               PrimaryButton(
                 label: 'Guardar',
@@ -141,7 +143,11 @@ class PerfilCard extends StatelessWidget {
     );
   }
 
-  Widget _editField(String label, TextEditingController controller, {TextInputType? keyboardType}) {
+  Widget _editField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+  }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
@@ -158,5 +164,4 @@ class PerfilCard extends StatelessWidget {
       style: GoogleFonts.montserrat(fontSize: 16),
     );
   }
-
 }

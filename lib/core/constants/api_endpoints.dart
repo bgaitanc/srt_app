@@ -1,14 +1,16 @@
 class ApiEndpoints {  
   // Auth endpoints
-  static const String login = '/Authentication/login';
-  static const String register = '/Users/register';
-  static const String userInfo = '/Users/info';
+  static const String login = '/authentication/login';
+  static const String refreshToken = '/authentication/refresh-token';
+  static const String register = '/users/register';
+  static const String userInfo = '/users/info';
   
   // Reservation endpoints
-  static const String reservasByUser = '/Reservas/user';
-  static const String createReserva = '/Reservas/create';
-  static const String reservaDetalle = '/Reservas/detalle';
-  
+  static const String reservationsByUser = '/reservations/user';
+  static const String createReservation = '/reservations/create';
+  static const String reservationDetail = '/reservations/detail';
+
   // Travels endpoints
-  static const String viajes = '/viajes/all';
+  static const String travels = '/travels/all';
+  static const String createTravel = '/travels/create';
 }

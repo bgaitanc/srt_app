@@ -1,13 +1,16 @@
+//TODO renombrar a token o authentication??
 class User {
   final String token;
-  final int usuarioId;
+  final String refreshToken;
+  final String userId;
 
-  User({required this.token, required this.usuarioId});
+  User({required this.token, required this.refreshToken, required this.userId});
 
   static User fromJson(Map<String, dynamic> json) {
     final data = json['data'] ?? {};
     final token = data['token'] ?? '';
-    final usuarioId = data['usuarioId'] ?? 0;
-    return User(token: token, usuarioId: usuarioId);
+    final refreshToken = data['refreshToken'] ?? '';
+    // TODO corregir esto, creo que no es correcto por el userId
+    return User(token: token, refreshToken: refreshToken, userId: '');
   }
 }

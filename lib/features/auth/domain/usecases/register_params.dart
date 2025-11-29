@@ -4,19 +4,16 @@ class RegisterParams extends BaseUserData {
   final String password;
 
   const RegisterParams({
-    required super.nombres,
-    required super.apellidos,
-    required super.usuario,
-    required super.correo,
-    required super.telefono,
+    required super.name,
+    required super.surname,
+    required super.username,
+    required super.email,
+    required super.phoneNumber,
     required this.password,
   });
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      ...super.toJson(),
-      'password': password,
-    };
+    return {...super.toJson(), 'password': password};
   }
 }
