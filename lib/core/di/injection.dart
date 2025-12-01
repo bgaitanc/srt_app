@@ -34,17 +34,15 @@ Future<void> init() async {
 
   //dio.interceptors.add(QueuedInterceptor());
 
-  // Add token interceptor (handles attaching token + refresh flow)
-  dio.interceptors.add(TokenInterceptor(dio));
-  // Add HTTP response interceptor
   dio.interceptors.add(HttpResponseInterceptor());
+  dio.interceptors.add(TokenInterceptor(dio));
   
   // Add pretty logger for debugging
   dio.interceptors.add(
     PrettyDioLogger(
-      requestHeader: true,
-      requestBody: true,
-      responseBody: true,
+      requestHeader: false,
+      requestBody: false,
+      responseBody: false,
       responseHeader: false,
       error: true,
       compact: true,
