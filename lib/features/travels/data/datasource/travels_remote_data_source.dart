@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'dart:io' show HttpStatus;
 import '../../../../core/infrastructure/network/remote_data_source_base.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/utils/response_helper.dart';
@@ -17,15 +19,19 @@ class TravelsRemoteDataSourceImpl extends RemoteDataSourceBase
 
   @override
   Future<List<TravelEntity>> getTravels() async {
-    return await handleRequest<List<TravelEntity>>(
-      request: () => dio.get(ApiEndpoints.travels),
-      parser: (response) {
-        return ResponseHelper.parseList(
-          response,
-          (json) => TravelModel.fromJson(json),
-        );
-      },
-    );
+    try {
+      final response = await dio.get(ApiEndpoints.travels);
+      return ResponseHelper.extractList<TravelEntity>(
+        response,
+        'data',
+        (json) => TravelModel.fromJson(json),
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == HttpStatus.notFound) {
+        return [];
+      }
+      rethrow;
+    }
   }
 
   @override

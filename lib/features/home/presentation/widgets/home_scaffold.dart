@@ -50,17 +50,20 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   }
 
   Future<void> _loadUserIdAndFetchData() async {
-    final userId = await SessionManager.getUserId();
-    if (userId == null) {
+    final token = await SessionManager.getToken();
+    if (token == null || token.isEmpty) {
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/login');
       }
       return;
     }
+    final storedUserId = await SessionManager.getUserId();
     setState(() {
-      _userId = userId;
+      _userId = (storedUserId != null && storedUserId.isNotEmpty) ? storedUserId : null;
     });
-    reservationsBloc.add(FetchReservations(userId));
+    if (_userId != null) {
+      reservationsBloc.add(FetchReservations(_userId!));
+    }
     userInfoBloc.add(const FetchUserInfo());
     travelsBloc.add(const FetchTravels());
   }
@@ -148,12 +151,15 @@ class _HomeScaffoldState extends State<HomeScaffold> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
                 const SizedBox(height: 16),
-                Text(ErrorMessageHelper.getFriendlyMessage(state.failure.message)),
+                Text(
+                  ErrorMessageHelper.getFriendlyMessage(state.failure.message),
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => userInfoBloc.add(const FetchUserInfo()),
+                  onPressed: () => travelsBloc.add(const FetchTravels()),
                   child: const Text('Reintentar'),
                 ),
               ],
@@ -207,7 +213,19 @@ class _HomeScaffoldState extends State<HomeScaffold> {
           Navigator.of(context).pushReplacementNamed('/login');
         },
       ),
-      body: _currentIndex == 0
+      body: BlocListener<UserInfoBloc, UserInfoState>(
+        bloc: userInfoBloc,
+        listener: (context, state) {
+          if (state is UserInfoLoaded) {
+            if (state.userInfo.userId.isNotEmpty) {
+              setState(() => _userId = state.userInfo.userId);
+              if (_currentIndex == 0) {
+                reservationsBloc.add(FetchReservations(state.userInfo.userId));
+              }
+            }
+          }
+        },
+        child: _currentIndex == 0
           ? BlocBuilder<ReservationsBloc, ReservationsState>(
               bloc: reservationsBloc,
               builder: (context, state) {
@@ -237,7 +255,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Cuando realices una reservation, aparecerá aquí',
+                              'Cuando realices una reservación, aparecerá aquí',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 14,
@@ -310,6 +328,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
           : _currentIndex == 1
               ? _buildTravelsPage()
               : _buildProfilePage(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

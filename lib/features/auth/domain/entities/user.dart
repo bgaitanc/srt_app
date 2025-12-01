@@ -10,7 +10,8 @@ class User {
     final data = json['data'] ?? {};
     final token = data['token'] ?? '';
     final refreshToken = data['refreshToken'] ?? '';
-    // TODO corregir esto, creo que no es correcto por el userId
-    return User(token: token, refreshToken: refreshToken, userId: '');
+    final rawUserId = data['userId'] ?? data['id'] ?? '';
+    final userId = rawUserId.toString();
+    return User(token: token, refreshToken: refreshToken, userId: userId);
   }
 }

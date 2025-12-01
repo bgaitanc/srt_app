@@ -24,6 +24,7 @@ class TokenInterceptor extends QueuedInterceptor {
     final token = await SessionManager.getToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
+      //print('[TokenInterceptor] Attached Authorization header for ${options.method} ${options.path}');
     }
     handler.next(options);
   }
@@ -31,7 +32,15 @@ class TokenInterceptor extends QueuedInterceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == HttpStatus.unauthorized) {
+      //print('[TokenInterceptor] 401 Unauthorized on ${err.requestOptions.method} ${err.requestOptions.path}');
       if (err.requestOptions.path == "$baseUrl${ApiEndpoints.refreshToken}") {
+        await SessionManager.clearSession();
+        return handler.next(err);
+      }
+
+      // If there is no refresh token stored, skip refresh flow
+      final storedRefresh = await SessionManager.getRefreshToken();
+      if (storedRefresh == null || storedRefresh.isEmpty) {
         await SessionManager.clearSession();
         return handler.next(err);
       }

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:srt_app/core/infrastructure/network/http_response_interceptor.dart';
+import 'package:srt_app/core/infrastructure/network/token_interceptor.dart';
 import 'package:srt_app/features/auth/data/datasource/auth_remote_data_source.dart';
 import 'package:srt_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:srt_app/features/auth/domain/repositories/auth_repository.dart';
@@ -33,6 +34,8 @@ Future<void> init() async {
 
   //dio.interceptors.add(QueuedInterceptor());
 
+  // Add token interceptor (handles attaching token + refresh flow)
+  dio.interceptors.add(TokenInterceptor(dio));
   // Add HTTP response interceptor
   dio.interceptors.add(HttpResponseInterceptor());
   
