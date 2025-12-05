@@ -5,6 +5,7 @@ import 'package:srt_app/core/errors/exceptions.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/user_info.dart';
 import '../../domain/usecases/register_params.dart';
+import '../../domain/usecases/update_profile_params.dart';
 import '../../../../core/utils/response_helper.dart';
 
 class AuthRemoteDataSource extends RemoteDataSourceBase {
@@ -42,6 +43,19 @@ class AuthRemoteDataSource extends RemoteDataSourceBase {
   Future<UserInfo> getUserInfo() async {
     final response = await safeRequest(() => dio.get(
       ApiEndpoints.userInfo,
+    ));
+    
+    return ResponseHelper.extractObject<UserInfo>(
+      response,
+      'data',
+      (json) => UserInfo.fromJson({'data': json}),
+    );
+  }
+
+  Future<UserInfo> updateUserProfile(UpdateProfileParams params) async {
+    final response = await safeRequest(() => dio.put(
+      ApiEndpoints.updateProfile,
+      data: params.toJson(),
     ));
     
     return ResponseHelper.extractObject<UserInfo>(

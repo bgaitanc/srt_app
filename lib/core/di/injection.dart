@@ -10,6 +10,7 @@ import 'package:srt_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:srt_app/features/auth/domain/usecases/login_user.dart';
 import 'package:srt_app/features/auth/domain/usecases/register_user.dart';
 import 'package:srt_app/features/auth/domain/usecases/get_user_info.dart';
+import 'package:srt_app/features/auth/domain/usecases/update_user_profile.dart';
 import 'package:srt_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:srt_app/features/profile/presentation/bloc/user_info_bloc.dart';
 import 'package:srt_app/features/reservations/data/datasource/reservations_remote_data_source.dart';
@@ -40,10 +41,10 @@ Future<void> init() async {
   // Add pretty logger for debugging
   dio.interceptors.add(
     PrettyDioLogger(
-      requestHeader: false,
-      requestBody: false,
-      responseBody: false,
-      responseHeader: false,
+      requestHeader: true,
+      requestBody: true,
+      responseBody: true,
+      responseHeader: true,
       error: true,
       compact: true,
       maxWidth: 90,
@@ -80,6 +81,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LoginUser(sl()));
   sl.registerLazySingleton(() => RegisterUser(sl()));
   sl.registerLazySingleton(() => GetUserInfo(sl()));
+  sl.registerLazySingleton(() => UpdateUserProfile(sl()));
   sl.registerLazySingleton(() => GetReservationsByUser(sl()));
   sl.registerLazySingleton(() => GetTravels(sl()));
   sl.registerLazySingleton(() => CreateReservation(sl()));
@@ -90,7 +92,10 @@ Future<void> init() async {
         registerUser: sl(),
         getUserInfo: sl(),
       ));
-  sl.registerFactory(() => UserInfoBloc(getUserInfo: sl()));
+  sl.registerFactory(() => UserInfoBloc(
+        getUserInfo: sl(),
+        updateUserProfile: sl(),
+      ));
   sl.registerFactory(() => ReservationsBloc(
         getReservationsByUser: sl(),
         createReservation: sl(),

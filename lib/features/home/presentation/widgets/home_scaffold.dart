@@ -131,43 +131,45 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   }
 
   Widget _buildProfilePage() {
-    return BlocBuilder<UserInfoBloc, UserInfoState>(
-      bloc: userInfoBloc,
-      builder: (context, state) {
-        if (state is UserInfoLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is UserInfoLoaded) {
-          final userInfo = state.userInfo;
-          return ProfileCard(
-            username: userInfo.username,
-            name: userInfo.name,
-            surname: userInfo.surname,
-            email: userInfo.email,
-            phoneNumber: userInfo.phoneNumber,
-            memberSince: '16-11-2025', // TODO: Get from backend
-          );
-        } else if (state is UserInfoError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-                const SizedBox(height: 16),
-                Text(
-                  ErrorMessageHelper.getFriendlyMessage(state.failure.message),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => travelsBloc.add(const FetchTravels()),
-                  child: const Text('Reintentar'),
-                ),
-              ],
-            ),
-          );
-        }
-        return const Center(child: Text('Cargando perfil...'));
-      },
+    return BlocProvider.value(
+      value: userInfoBloc,
+      child: BlocBuilder<UserInfoBloc, UserInfoState>(
+        bloc: userInfoBloc,
+        builder: (context, state) {
+          if (state is UserInfoLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is UserInfoLoaded) {
+            final userInfo = state.userInfo;
+            return ProfileCard(
+              username: userInfo.username,
+              name: userInfo.name,
+              surname: userInfo.surname,
+              email: userInfo.email,
+              phoneNumber: userInfo.phoneNumber,
+            );
+          } else if (state is UserInfoError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+                  const SizedBox(height: 16),
+                  Text(
+                    ErrorMessageHelper.getFriendlyMessage(state.failure.message),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => userInfoBloc.add(const FetchUserInfo()),
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const Center(child: Text('Cargando perfil...'));
+        },
+      ),
     );
   }
 

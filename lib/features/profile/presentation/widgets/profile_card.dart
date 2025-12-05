@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/styles/app_text_styles.dart';
 import '../../../../core/presentation/widgets/cards/info_row.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
+import '../../../auth/domain/usecases/update_profile_params.dart';
+import '../bloc/user_info_bloc.dart';
+import '../bloc/user_info_event.dart';
+import '../bloc/user_info_state.dart';
 
 class ProfileCard extends StatelessWidget {
   final String username;
@@ -11,7 +16,6 @@ class ProfileCard extends StatelessWidget {
   final String surname;
   final String email;
   final String phoneNumber;
-  final String memberSince;
 
   const ProfileCard({
     super.key,
@@ -20,7 +24,6 @@ class ProfileCard extends StatelessWidget {
     required this.surname,
     required this.email,
     required this.phoneNumber,
-    required this.memberSince,
   });
 
   @override
@@ -59,12 +62,6 @@ class ProfileCard extends StatelessWidget {
               InfoRow(icon: Icons.email, label: 'Correo', value: email),
               const SizedBox(height: 8),
               InfoRow(icon: Icons.phone, label: 'Teléfono', value: phoneNumber),
-              const SizedBox(height: 24),
-              InfoRow(
-                icon: Icons.calendar_today,
-                label: 'Miembro desde',
-                value: memberSince,
-              ),
               const SizedBox(height: AppConstants.spacingXXLarge),
               PrimaryButton(
                 label: 'Editar perfil',
@@ -90,12 +87,12 @@ class ProfileCard extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
-      builder: (context) => Padding(
+      builder: (modalContext) => Padding(
         padding: EdgeInsets.only(
           left: 24,
           right: 24,
           top: 24,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          bottom: MediaQuery.of(modalContext).viewInsets.bottom + 24,
         ),
         child: SingleChildScrollView(
           child: Column(
@@ -105,7 +102,7 @@ class ProfileCard extends StatelessWidget {
               Center(
                 child: Text(
                   'Editar perfil',
-                  style: AppTextStyles.titleMedium(context),
+                  style: AppTextStyles.titleMedium(modalContext),
                 ),
               ),
               const SizedBox(height: 18),
@@ -130,9 +127,13 @@ class ProfileCard extends StatelessWidget {
                 icon: Icons.save,
                 isFullWidth: true,
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Perfil actualizado (demo)')),
+                  Navigator.of(modalContext).pop();
+                  _handleProfileUpdate(
+                    context,
+                    nameController.text,
+                    surnameController.text,
+                    emailController.text,
+                    phoneNumberController.text,
                   );
                 },
               ),
@@ -163,5 +164,52 @@ class ProfileCard extends StatelessWidget {
       ),
       style: GoogleFonts.montserrat(fontSize: 16),
     );
+  }
+
+  void _handleProfileUpdate(
+    BuildContext context,
+    String newName,
+    String newSurname,
+    String newEmail,
+    String newPhoneNumber,
+  ) {
+    // Cache ScaffoldMessenger before async operations
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
+    // Dispatch the update event
+    context.read<UserInfoBloc>().add(
+      UpdateUserProfileEvent(
+        UpdateProfileParams(
+          name: newName,
+          surname: newSurname,
+          email: newEmail,
+          phoneNumber: newPhoneNumber,
+        ),
+      ),
+    );
+
+    // Listen for the result
+    final subscription = context.read<UserInfoBloc>().stream.listen((state) {
+      if (state is UserInfoLoaded) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (state is UserInfoError) {
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar perfil: ${state.failure}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+
+    // Cancel subscription after a short delay to avoid memory leaks
+    Future.delayed(const Duration(seconds: 3), () {
+      subscription.cancel();
+    });
   }
 }

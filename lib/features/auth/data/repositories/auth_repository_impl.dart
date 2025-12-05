@@ -3,6 +3,7 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/entities/user_info.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/update_profile_params.dart';
 import '../datasource/auth_remote_data_source.dart';
 import '../../../../core/utils/safe_call.dart';
 import '../../domain/usecases/register_params.dart';
@@ -25,5 +26,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserInfo>> getUserInfo() {
     return safeCall(() => remote.getUserInfo());
+  }
+
+  @override
+  Future<Either<Failure, UserInfo>> updateUserProfile(UpdateProfileParams params) {
+    return safeCall(() => remote.updateUserProfile(params));
   }
 }

@@ -4,6 +4,7 @@ class ApiEndpoints {
   static const String refreshToken = '/authentication/refresh-token';
   static const String register = '/users/register';
   static const String userInfo = '/users/info';
+  static const String updateProfile = '/users/profile';
   
   // Reservation endpoints
   static const String reservationsByUser = '/reservations/user';
