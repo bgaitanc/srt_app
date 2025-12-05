@@ -81,7 +81,10 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     final roles = await SessionManager.getUserRoles();
     
     setState(() {
-      _isDriver = roles?.contains('Conductor') ?? false;
+      _isDriver = roles?.any((r) {
+        final v = r.toLowerCase();
+        return v == 'conductor' || v == 'driver';
+      }) ?? false;
     });
     
     if (_isDriver) {
@@ -201,14 +204,22 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   void _onSelectTab(int index) {
     setState(() {
       _currentIndex = index;
-      if (index == 0 && _userId != null) {
-        reservationsBloc.add(FetchReservations(_userId!));
-      } else if (index == 1) {
-        travelsBloc.add(const FetchTravels());
-      } else if (index == 2) {
-        userInfoBloc.add(const FetchUserInfo());
-      } else if (index == 3 && _isDriver) {
-        driverTripsBloc?.add(LoadAssignedTripsEvent());
+      if (_isDriver) {
+        if (index == 0) {
+          driverTripsBloc?.add(LoadAssignedTripsEvent());
+        } else if (index == 1) {
+          userInfoBloc.add(const FetchUserInfo());
+        }
+      } else {
+        if (index == 0 && _userId != null) {
+          reservationsBloc.add(FetchReservations(_userId!));
+        } else if (index == 1) {
+          travelsBloc.add(const FetchTravels());
+        } else if (index == 2) {
+          userInfoBloc.add(const FetchUserInfo());
+        } else if (index == 3) {
+          driverTripsBloc?.add(LoadAssignedTripsEvent());
+        }
       }
     });
   }
@@ -225,7 +236,7 @@ class _HomeScaffoldState extends State<HomeScaffold> {
       appBar: TopBar(title: _pageTitle(), onMenuPressed: _openDrawer),
       drawer: AppDrawer(
         onNavigateHome: () => _onSelectTab(0),
-        onNavigateProfile: () => _onSelectTab(2),
+        onNavigateProfile: () => _onSelectTab(_isDriver ? 1 : 2),
         onNavigateSettings: () {
           final themeBloc = context.read<ThemeBloc>();
           Navigator.of(context).pop();
@@ -254,111 +265,113 @@ class _HomeScaffoldState extends State<HomeScaffold> {
             }
           }
         },
-        child: _currentIndex == 0
-          ? BlocBuilder<ReservationsBloc, ReservationsState>(
-              bloc: reservationsBloc,
-              builder: (context, state) {
-                if (state is ReservationsLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is ReservationsLoaded) {
-                  if (state.reservations.isEmpty) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.event_busy,
-                              size: 80,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No tienes reservas',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade700,
+        child: _isDriver
+            ? (_currentIndex == 0
+                ? _buildDriverPage()
+                : _buildProfilePage())
+            : (_currentIndex == 0
+                ? BlocBuilder<ReservationsBloc, ReservationsState>(
+                    bloc: reservationsBloc,
+                    builder: (context, state) {
+                      if (state is ReservationsLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is ReservationsLoaded) {
+                        if (state.reservations.isEmpty) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.event_busy,
+                                    size: 80,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No tienes reservas',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Cuando realices una reservación, aparecerá aquí',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Cuando realices una reservación, aparecerá aquí',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    itemCount: state.reservations.length,
-                    itemBuilder: (context, index) {
-                      final reservation = state.reservations[index];
-                      return ReservationCard(
-                        state: 'Completado', // TODO: Map real estado
-                        reservation: reservation,
-                      );
-                    },
-                  );
-                } else if (state is ReservationsError) {
-                  final friendlyMessage = ErrorMessageHelper.getFriendlyMessage(state.failure.message);
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red.shade300,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            friendlyMessage,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          if (_userId != null)
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                reservationsBloc.add(FetchReservations(_userId!));
-                              },
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Reintentar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0288D1),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
+                          );
+                        }
+                        return ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          itemCount: state.reservations.length,
+                          itemBuilder: (context, index) {
+                            final reservation = state.reservations[index];
+                            return ReservationCard(
+                              state: 'Completado',
+                              reservation: reservation,
+                            );
+                          },
+                        );
+                      } else if (state is ReservationsError) {
+                        final friendlyMessage = ErrorMessageHelper.getFriendlyMessage(state.failure.message);
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 64,
+                                  color: Colors.red.shade300,
                                 ),
-                              ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  friendlyMessage,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                if (_userId != null)
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      reservationsBloc.add(FetchReservations(_userId!));
+                                    },
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text('Reintentar'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0288D1),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                return const Center(child: Text('Seleccione para ver reservas.'));
-              },
-            )
-          : _currentIndex == 1
-              ? _buildTravelsPage()
-              : _currentIndex == 2
-                  ? _buildProfilePage()
-                  : _buildDriverPage(),
+                          ),
+                        );
+                      }
+                      return const Center(child: Text('Seleccione para ver reservas.'));
+                    },
+                  )
+                : _currentIndex == 1
+                    ? _buildTravelsPage()
+                    : _buildProfilePage()),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -368,29 +381,34 @@ class _HomeScaffoldState extends State<HomeScaffold> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         backgroundColor: Theme.of(context).colorScheme.surface,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Reservas'),
-          BottomNavigationBarItem(icon: Icon(Icons.flight_takeoff), label: 'Viajes'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-          if (_isDriver)
-            BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Conductor'),
-        ],
+        items: _isDriver
+            ? const [
+                BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Conductor'),
+                BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+              ]
+            : const [
+                BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Reservas'),
+                BottomNavigationBarItem(icon: Icon(Icons.flight_takeoff), label: 'Viajes'),
+                BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+              ],
       ),
     );
   }
 
   String _pageTitle() {
-    switch (_currentIndex) {
-      case 0:
-        return 'Reservas';
-      case 1:
-        return 'Viajes';
-      case 2:
-        return 'Conductor';
-      case 3:
-        return 'Conductor';
-      default:
-        return 'SRT';
+    if (_isDriver) {
+      return _currentIndex == 0 ? 'Conductor' : 'Perfil';
+    } else {
+      switch (_currentIndex) {
+        case 0:
+          return 'Reservas';
+        case 1:
+          return 'Viajes';
+        case 2:
+          return 'Perfil';
+        default:
+          return 'SRT';
+      }
     }
   }
 
