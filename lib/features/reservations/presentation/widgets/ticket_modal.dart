@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../domain/entities/reservation_info_entity.dart';
 
@@ -57,56 +58,39 @@ class TicketModal extends StatelessWidget {
 
   Widget _buildQRSection() {
     return Container(
-      padding: EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF7C3AED), Color(0xFF6366F1)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xFF7C3AED).withOpacity(0.3),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          Text(
-            'Ticket de Viaje',
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 16),
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200, width: 2),
             ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.qr_code_2,
-                  size: 140,
-                  color: Color(0xFF7C3AED),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'ID: ${reservation.reservationId.substring(0, 8)}...',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+            child: QrImageView(
+              data: reservation.reservationId,
+              version: QrVersions.auto,
+              size: 180,
+              backgroundColor: Colors.white,
+              errorCorrectionLevel: QrErrorCorrectLevel.M,
+            ),
+          ),
+          SizedBox(height: 12),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              'ID: ${reservation.reservationId.substring(0, 8).toUpperCase()}...',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ],
