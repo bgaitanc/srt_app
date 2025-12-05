@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../domain/entities/reservation_detail_entity.dart';
 import '../../domain/entities/travel_entity.dart';
@@ -8,6 +9,9 @@ import '../../../reservations/domain/entities/create_reservation_request_entity.
 import '../../../reservations/presentation/bloc/reservation_bloc.dart';
 import '../../../reservations/presentation/bloc/reservations_event.dart';
 import '../../../reservations/presentation/bloc/reservations_state.dart';
+import '../../../payments/presentation/pages/card_payment_page.dart';
+import '../../../payments/presentation/bloc/payment_bloc.dart';
+import '../../../../core/di/injection.dart';
 
 class SeatSelectionModal extends StatefulWidget {
   final ReservationDetailEntity reservationDetail;
@@ -60,7 +64,6 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
       _isCreating = true;
     });
 
-    // Get the current user ID
     final userId = await SessionManager.getUserId();
     if (userId == null) {
       if (mounted) {
@@ -89,16 +92,43 @@ class _SeatSelectionModalState extends State<SeatSelectionModal> {
     await for (final state in widget.reservationsBloc.stream) {
       if (state is ReservationCreated) {
         if (mounted) {
-          Navigator.of(context).pop(true); // Return true to indicate success
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '¡Reserva creada exitosamente! Asientos: ${request.seats.join(", ")}',
+          final totalAmountMinor = (_calculateTotal() * 100).round();
+          final paid = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (_) => sl<PaymentBloc>(),
+                child: CardPaymentPage(
+                  amountMinorUnits: totalAmountMinor,
+                  currency: 'usd',
+                  description: 'Reserva viaje ${widget.travel.travelId}',
+                  autoPayTest: true,
+                ),
               ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
             ),
           );
+
+          if (paid == true) {
+            Navigator.of(context).pop(true);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '¡Reserva y pago completados! Asientos: ${request.seats.join(", ")}',
+                ),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          } else {
+            setState(() {
+              _isCreating = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Pago cancelado o fallido'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
         break;
       } else if (state is ReservationCreateError) {

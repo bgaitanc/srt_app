@@ -33,6 +33,11 @@ import 'package:srt_app/features/driver/domain/usecases/validate_ticket.dart';
 import 'package:srt_app/features/driver/domain/usecases/complete_trip.dart';
 import 'package:srt_app/features/driver/presentation/bloc/driver_trips_bloc.dart';
 import 'package:srt_app/features/driver/presentation/bloc/ticket_scanner_bloc.dart';
+import 'package:srt_app/features/payments/data/datasources/payments_remote_data_source.dart';
+import 'package:srt_app/features/payments/data/repositories/payments_repository_impl.dart';
+import 'package:srt_app/features/payments/domain/repositories/payments_repository.dart';
+import 'package:srt_app/features/payments/domain/usecases/create_payment_intent.dart';
+import 'package:srt_app/features/payments/presentation/bloc/payment_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -76,6 +81,9 @@ Future<void> init() async {
   sl.registerLazySingleton<DriverRemoteDataSource>(
     () => DriverRemoteDataSource(sl()),
   );
+  sl.registerLazySingleton<PaymentsRemoteDataSource>(
+    () => PaymentsRemoteDataSource(sl()),
+  );
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
@@ -90,6 +98,9 @@ Future<void> init() async {
   sl.registerLazySingleton<DriverRepository>(
     () => DriverRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<PaymentsRepository>(
+    () => PaymentsRepositoryImpl(sl()),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
@@ -102,6 +113,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetAssignedTrips(sl()));
   sl.registerLazySingleton(() => ValidateTicket(sl()));
   sl.registerLazySingleton(() => CompleteTrip(sl()));
+  sl.registerLazySingleton(() => CreatePaymentIntent(sl()));
 
   // Bloc
   sl.registerFactory(() => AuthBloc(
@@ -124,4 +136,6 @@ Future<void> init() async {
         completeTrip: sl(),
       ));
   sl.registerFactory(() => TicketScannerBloc(validateTicket: sl()));
+  final paymentsMock = dotenv.env['PAYMENTS_MOCK'] == 'true';
+  sl.registerFactory(() => PaymentBloc(createPaymentIntent: sl(), mock: paymentsMock));
 }
