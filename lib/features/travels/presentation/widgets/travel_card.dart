@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../domain/entities/travel_entity.dart';
+import '../../domain/entities/reservation_detail_entity.dart';
 import '../../domain/repositories/travels_repository.dart';
 import '../../../../core/presentation/widgets/buttons/primary_button.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/infrastructure/storage/session_manager.dart';
+import '../../../../core/utils/date_formatter.dart';
 import '../../../reservations/presentation/bloc/reservation_bloc.dart';
 import '../../../reservations/presentation/bloc/reservations_event.dart';
 import 'seat_selection_modal.dart';
@@ -18,15 +19,6 @@ class TravelCard extends StatelessWidget {
     required this.travel,
   });
 
-  String _formatDateTime(String dateTimeStr) {
-    try {
-      final dateTime = DateTime.parse(dateTimeStr);
-      return DateFormat('dd MMM yyyy, HH:mm', 'es').format(dateTime);
-    } catch (e) {
-      return dateTimeStr;
-    }
-  }
-
   String _formatCurrency(double amount) {
     return 'C\$${amount.toStringAsFixed(2)}';
   }
@@ -34,132 +26,228 @@ class TravelCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 1,
+      shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: InkWell(
+        onTap: () => _handleReservation(context),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF7C3AED), Color(0xFF6366F1)],
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.route, color: Colors.white, size: 16),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          travel.originDestination,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.arrow_forward, size: 10, color: Colors.grey.shade600),
+                            SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                travel.finalDestination,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        _formatCurrency(travel.price),
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF7C3AED),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(travel.status).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          travel.status,
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            color: _getStatusColor(travel.status),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              
+              SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildCompactTimeInfo(
+                      icon: Icons.flight_takeoff,
+                      time: DateFormatter.formatDateTimeString(travel.departureDate),
+                      color: Color(0xFF7C3AED),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6),
+                    child: Icon(Icons.arrow_forward, size: 14, color: Colors.grey.shade400),
+                  ),
+                  Expanded(
+                    child: _buildCompactTimeInfo(
+                      icon: Icons.flight_land,
+                      time: DateFormatter.formatDateTimeString(travel.arrivalDate),
+                      color: Color(0xFF14B8A6),
+                    ),
+                  ),
+                ],
+              ),
+              
+              SizedBox(height: 8),
+              Wrap(
+                spacing: 12,
+                runSpacing: 4,
+                children: [
+                  _buildCompactDetail(Icons.directions_bus, '${travel.model}'),
+                  _buildCompactDetail(Icons.person, '${travel.driverName}'),
+                  _buildCompactDetail(Icons.event_seat, '${travel.capacity} asientos'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildCompactTimeInfo({
+    required IconData icon,
+    required String time,
+    required Color color,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF0288D1), Color(0xFF03A9F4)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          Icon(icon, size: 12, color: color),
+          SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              time,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        travel.originDestination,
-                        style: GoogleFonts.montserrat(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.arrow_downward, color: Colors.white70, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${travel.distanceInKm} km',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.flag, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        travel.finalDestination,
-                        style: GoogleFonts.montserrat(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoRow(Icons.access_time, 'Salida', _formatDateTime(travel.departureDate)),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.schedule, 'Llegada', _formatDateTime(travel.arrivalDate)),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.directions_bus, 'Vehículo', '${travel.model} (${travel.registrationPlate})'),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.event_seat, 'Capacidad', '${travel.capacity} asientos'),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.person, 'Conductor', '${travel.driverName} ${travel.driverSurname}'),
-                const SizedBox(height: 12),
-                
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(travel.status),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        travel.status,
-                        style: GoogleFonts.montserrat(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      _formatCurrency(travel.price),
-                      style: GoogleFonts.montserrat(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0288D1),
-                      ),
-                    ),
-                  ],
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildCompactDetail(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: Color(0xFF6366F1)),
+        SizedBox(width: 4),
+        Text(
+          text,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeInfo({
+    required IconData icon,
+    required String label,
+    required String time,
+    required Color color,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              SizedBox(width: 6),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
                 ),
-                const SizedBox(height: 16),
-                
-                PrimaryButton(
-                  label: 'Reservar',
-                  icon: Icons.bookmark,
-                  isFullWidth: true,
-                  onPressed: () => _handleReservation(context),
-                ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: 6),
+          Text(
+            time,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -167,23 +255,24 @@ class TravelCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.grey.shade600),
-        const SizedBox(width: 8),
+        Icon(icon, size: 18, color: Color(0xFF6366F1)),
+        SizedBox(width: 10),
         Text(
           '$label: ',
-          style: GoogleFonts.montserrat(
-            fontSize: 14,
+          style: GoogleFonts.inter(
+            fontSize: 13,
             color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: GoogleFonts.montserrat(
-              fontSize: 14,
+            style: GoogleFonts.inter(
+              fontSize: 13,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -196,13 +285,13 @@ class TravelCard extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'programado':
-        return Colors.blue;
+        return Color(0xFF6366F1);
       case 'en curso':
-        return Colors.orange;
+        return Color(0xFFF59E0B);
       case 'completado':
-        return Colors.green;
+        return Color(0xFF10B981);
       case 'cancelado':
-        return Colors.red;
+        return Color(0xFFEF4444);
       default:
         return Colors.grey;
     }
@@ -227,43 +316,18 @@ class TravelCard extends StatelessWidget {
 
       result.fold(
         (failure) {
-
+          // if 404, use travel data directly
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error al cargar los asientos: ${failure.message}'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            _showSeatSelection(context, ReservationDetailEntity(
+              travelId: travel.travelId,
+              capacity: travel.capacity,
+              reservedSeats: const [],
+            ));
           }
         },
         (reservationDetail) async {
-          // Show seat selection modal
           if (context.mounted) {
-            // Get ReservasBloc from context (it should be available from HomeScaffold)
-            final reservationsBloc = sl<ReservationsBloc>();
-            
-            final success = await showModalBottomSheet<bool>(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              isDismissible: false,
-              builder: (context) => SizedBox(
-                height: MediaQuery.of(context).size.height * 0.85,
-                child: SeatSelectionModal(
-                  reservationDetail: reservationDetail,
-                  travel: travel,
-                  reservationsBloc: reservationsBloc,
-                ),
-              ),
-            );
-
-            if (success == true && context.mounted) {
-              final userId = await SessionManager.getUserId();
-              if (userId != null) {
-                reservationsBloc.add(FetchReservations(userId));
-              }
-            }
+            _showSeatSelection(context, reservationDetail);
           }
         },
       );
@@ -276,6 +340,32 @@ class TravelCard extends StatelessWidget {
             backgroundColor: Colors.red,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _showSeatSelection(BuildContext context, ReservationDetailEntity reservationDetail) async {
+    final reservationsBloc = sl<ReservationsBloc>();
+    
+    final success = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85,
+        child: SeatSelectionModal(
+          reservationDetail: reservationDetail,
+          travel: travel,
+          reservationsBloc: reservationsBloc,
+        ),
+      ),
+    );
+
+    if (success == true && context.mounted) {
+      final userId = await SessionManager.getUserId();
+      if (userId != null) {
+        reservationsBloc.add(FetchReservations(userId));
       }
     }
   }

@@ -8,10 +8,12 @@ class ReservationInfoModel {
     final travel = JsonParserHelper.getNestedMap(json, 'travel');
     final route = JsonParserHelper.getNestedMap(json, 'route');
     final details = JsonParserHelper.getValue<List>(json, 'details');
+    final vehicle = JsonParserHelper.getNestedMap(json, 'vehicle');
+    final driver = JsonParserHelper.getNestedMap(json, 'driver');
 
     return ReservationInfoEntity(
-      reservationId: JsonParserHelper.getValueOrDefault(json, 'reservationId', 0),
-      travelId: JsonParserHelper.getValueOrDefault(json, 'travelId', 0),
+      reservationId: JsonParserHelper.getValueOrDefault(json, 'reservationId', ''),
+      travelId: JsonParserHelper.getValueOrDefault(json, 'travelId', ''),
       reservationDate: JsonParserHelper.parseDateTime(json['reservationDate']) ??
           DateTime.now(),
       seats: _parseSeats(details),
@@ -42,8 +44,11 @@ class ReservationInfoModel {
         '',
       ),
       vehicle: JsonParserHelper.getValueOrDefault(travel, 'vehicle', ''),
-      model: JsonParserHelper.getValueOrDefault(travel, 'model', ''),
+      model: JsonParserHelper.getValueOrDefault(vehicle, 'model', ''),
       brand: JsonParserHelper.getValueOrDefault(travel, 'brand', ''),
+      driverName: JsonParserHelper.getValueOrDefault(driver, 'name', ''),
+      driverSurname: JsonParserHelper.getValueOrDefault(driver, 'surname', ''),
+      registrationPlate: JsonParserHelper.getValueOrDefault(vehicle, 'registrationPlate', ''),
     );
   }
 

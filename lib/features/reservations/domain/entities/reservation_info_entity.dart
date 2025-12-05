@@ -2,8 +2,8 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ReservationInfoEntity {
-  final int reservationId;
-  final int travelId;
+  final String reservationId;
+  final String travelId;
   final DateTime reservationDate;
   final List<int> seats;
   final double total;
@@ -15,6 +15,9 @@ class ReservationInfoEntity {
   final String vehicle;
   final String model;
   final String brand;
+  final String driverName;
+  final String driverSurname;
+  final String registrationPlate;
 
   const ReservationInfoEntity({
     required this.reservationId,
@@ -30,5 +33,8 @@ class ReservationInfoEntity {
     required this.vehicle,
     required this.model,
     required this.brand,
+    required this.driverName,
+    required this.driverSurname,
+    required this.registrationPlate,
   });
 }

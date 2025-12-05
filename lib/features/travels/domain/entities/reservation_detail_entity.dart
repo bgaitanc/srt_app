@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class ReservationDetailEntity extends Equatable {
-  final int travelId;
+  final String travelId;
   final int capacity;
   final List<int> reservedSeats;
 

@@ -13,7 +13,7 @@ class ReservationDetailModel {
         <int>[];
 
     return ReservationDetailEntity(
-      travelId: JsonParserHelper.getValueOrDefault(json, 'travelId', 0),
+      travelId: JsonParserHelper.getValueOrDefault(json, 'travelId', ''),
       capacity: JsonParserHelper.getValueOrDefault(json, 'capacity', 0),
       reservedSeats: reservedSeats,
     );

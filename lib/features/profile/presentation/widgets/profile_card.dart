@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/styles/app_text_styles.dart';
-import '../../../../core/presentation/widgets/cards/info_row.dart';
-import '../../../../core/presentation/widgets/buttons/primary_button.dart';
 import '../../../auth/domain/usecases/update_profile_params.dart';
 import '../bloc/user_info_bloc.dart';
 import '../bloc/user_info_event.dart';
@@ -28,49 +25,176 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 38,
-                backgroundColor: AppConstants.primaryColor,
-                child: Text(
-                  username.substring(0, 1).toUpperCase(),
-                  style: GoogleFonts.montserrat(
-                    fontSize: 32,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: AppConstants.primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: CircleAvatar(
+                    radius: 35,
+                    backgroundColor: AppConstants.primaryColor,
+                    child: Text(
+                      username.substring(0, 1).toUpperCase(),
+                      style: GoogleFonts.inter(
+                        fontSize: 28,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppConstants.spacingXLarge),
-              Text('$name $surname', style: AppTextStyles.titleLarge(context)),
-              const SizedBox(height: AppConstants.spacingSmall),
-              Text('@$username', style: AppTextStyles.secondaryText(context)),
-              const SizedBox(height: AppConstants.spacingXLarge),
-              const Divider(height: 1, thickness: 1, color: Colors.grey),
-              const SizedBox(height: 16),
-              InfoRow(icon: Icons.person, label: 'Usuario', value: username),
-              const SizedBox(height: 8),
-              InfoRow(icon: Icons.email, label: 'Correo', value: email),
-              const SizedBox(height: 8),
-              InfoRow(icon: Icons.phone, label: 'Teléfono', value: phoneNumber),
-              const SizedBox(height: AppConstants.spacingXXLarge),
-              PrimaryButton(
-                label: 'Editar perfil',
-                icon: Icons.edit,
-                onPressed: () => _showEditModal(context),
-              ),
-            ],
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$name $surname',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '@$username',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          
+          SizedBox(height: 20),
+          
+          _buildInfoCard(Icons.person, 'Usuario', username, Color(0xFF7C3AED)),
+          SizedBox(height: 12),
+          _buildInfoCard(Icons.email, 'Correo', email, Color(0xFF6366F1)),
+          SizedBox(height: 12),
+          _buildInfoCard(Icons.phone, 'Teléfono', phoneNumber, Color(0xFF14B8A6)),
+          
+          SizedBox(height: 24),
+          
+          Container(
+            width: double.infinity,
+            height: 54,
+            decoration: BoxDecoration(
+              color: AppConstants.primaryColor,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppConstants.primaryColor.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _showEditModal(context),
+                borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.edit, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Editar Perfil',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(IconData icon, String label, String value, Color color) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  value,
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -84,85 +208,142 @@ class ProfileCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      builder: (modalContext) => Padding(
-        padding: EdgeInsets.only(
-          left: 24,
-          right: 24,
-          top: 24,
-          bottom: MediaQuery.of(modalContext).viewInsets.bottom + 24,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(
-                  'Editar perfil',
-                  style: AppTextStyles.titleMedium(modalContext),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 60,
+                bottom: MediaQuery.of(modalContext).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Editar Perfil',
+                    style: GoogleFonts.inter(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  _buildEditField('Nombres', nameController, Icons.person),
+                  SizedBox(height: 16),
+                  _buildEditField('Apellidos', surnameController, Icons.person_outline),
+                  SizedBox(height: 16),
+                  _buildEditField(
+                    'Correo',
+                    emailController,
+                    Icons.email,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  SizedBox(height: 16),
+                  _buildEditField(
+                    'Teléfono',
+                    phoneNumberController,
+                    Icons.phone,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF7C3AED), Color(0xFF6366F1)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(modalContext).pop();
+                          _handleProfileUpdate(
+                            context,
+                            nameController.text,
+                            surnameController.text,
+                            emailController.text,
+                            phoneNumberController.text,
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Center(
+                          child: Text(
+                            'Guardar Cambios',
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Navigator.of(modalContext).pop(),
+                icon: Icon(Icons.close, size: 28),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.grey.shade100,
+                  shape: CircleBorder(),
                 ),
               ),
-              const SizedBox(height: 18),
-              _editField('Nombres', nameController),
-              const SizedBox(height: 12),
-              _editField('Apellidos', surnameController),
-              const SizedBox(height: 12),
-              _editField(
-                'Correo',
-                emailController,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 12),
-              _editField(
-                'Teléfono',
-                phoneNumberController,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 24),
-              PrimaryButton(
-                label: 'Guardar',
-                icon: Icons.save,
-                isFullWidth: true,
-                onPressed: () {
-                  Navigator.of(modalContext).pop();
-                  _handleProfileUpdate(
-                    context,
-                    nameController.text,
-                    surnameController.text,
-                    emailController.text,
-                    phoneNumberController.text,
-                  );
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _editField(
+  Widget _buildEditField(
     String label,
-    TextEditingController controller, {
+    TextEditingController controller,
+    IconData icon, {
     TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      style: GoogleFonts.inter(fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: GoogleFonts.inter(
+          color: Colors.grey.shade600,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIcon: Icon(icon, color: Color(0xFF7C3AED)),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Color(0xFF7C3AED), width: 2),
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        filled: true,
+        fillColor: Colors.grey.shade50,
       ),
-      style: GoogleFonts.montserrat(fontSize: 16),
     );
   }
 
@@ -173,10 +354,8 @@ class ProfileCard extends StatelessWidget {
     String newEmail,
     String newPhoneNumber,
   ) {
-    // Cache ScaffoldMessenger before async operations
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     
-    // Dispatch the update event
     context.read<UserInfoBloc>().add(
       UpdateUserProfileEvent(
         UpdateProfileParams(
@@ -188,26 +367,40 @@ class ProfileCard extends StatelessWidget {
       ),
     );
 
-    // Listen for the result
     final subscription = context.read<UserInfoBloc>().stream.listen((state) {
       if (state is UserInfoLoaded) {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(
-            content: Text('Perfil actualizado exitosamente'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Text('Perfil actualizado exitosamente'),
+              ],
+            ),
+            backgroundColor: Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       } else if (state is UserInfoError) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Text('Error al actualizar perfil: ${state.failure}'),
-            backgroundColor: Colors.red,
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(child: Text('Error al actualizar perfil: ${state.failure}')),
+              ],
+            ),
+            backgroundColor: Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
     });
 
-    // Cancel subscription after a short delay to avoid memory leaks
     Future.delayed(const Duration(seconds: 3), () {
       subscription.cancel();
     });
