@@ -25,6 +25,14 @@ import 'package:srt_app/features/travels/domain/repositories/travels_repository.
 import 'package:srt_app/features/travels/domain/usecases/get_travels.dart';
 import 'package:srt_app/features/travels/presentation/bloc/travels_bloc.dart';
 import 'package:srt_app/core/theme/bloc/theme_bloc.dart';
+import 'package:srt_app/features/driver/data/datasources/driver_remote_data_source.dart';
+import 'package:srt_app/features/driver/data/repositories/driver_repository_impl.dart';
+import 'package:srt_app/features/driver/domain/repositories/driver_repository.dart';
+import 'package:srt_app/features/driver/domain/usecases/get_assigned_trips.dart';
+import 'package:srt_app/features/driver/domain/usecases/validate_ticket.dart';
+import 'package:srt_app/features/driver/domain/usecases/complete_trip.dart';
+import 'package:srt_app/features/driver/presentation/bloc/driver_trips_bloc.dart';
+import 'package:srt_app/features/driver/presentation/bloc/ticket_scanner_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -65,6 +73,9 @@ Future<void> init() async {
   sl.registerLazySingleton<TravelsRemoteDataSource>(
     () => TravelsRemoteDataSourceImpl(sl()),
   );
+  sl.registerLazySingleton<DriverRemoteDataSource>(
+    () => DriverRemoteDataSource(sl()),
+  );
 
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
@@ -76,6 +87,9 @@ Future<void> init() async {
   sl.registerLazySingleton<TravelsRepository>(
     () => TravelsRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<DriverRepository>(
+    () => DriverRepositoryImpl(sl()),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => LoginUser(sl()));
@@ -85,6 +99,9 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetReservationsByUser(sl()));
   sl.registerLazySingleton(() => GetTravels(sl()));
   sl.registerLazySingleton(() => CreateReservation(sl()));
+  sl.registerLazySingleton(() => GetAssignedTrips(sl()));
+  sl.registerLazySingleton(() => ValidateTicket(sl()));
+  sl.registerLazySingleton(() => CompleteTrip(sl()));
 
   // Bloc
   sl.registerFactory(() => AuthBloc(
@@ -102,4 +119,9 @@ Future<void> init() async {
       ));
   sl.registerFactory(() => TravelsBloc(sl()));
   sl.registerFactory(() => ThemeBloc());
+  sl.registerFactory(() => DriverTripsBloc(
+        getAssignedTrips: sl(),
+        completeTrip: sl(),
+      ));
+  sl.registerFactory(() => TicketScannerBloc(validateTicket: sl()));
 }

@@ -21,6 +21,11 @@ import '../../../../core/theme/bloc/theme_bloc.dart';
 import '../../../travels/presentation/bloc/travels_bloc.dart';
 import '../../../travels/presentation/bloc/travels_event.dart';
 import '../../../travels/presentation/bloc/travels_state.dart';
+import '../../../driver/presentation/bloc/driver_trips_bloc.dart';
+import '../../../driver/presentation/bloc/driver_trips_event.dart';
+import '../../../driver/presentation/bloc/driver_trips_state.dart';
+import '../../../driver/presentation/bloc/ticket_scanner_bloc.dart';
+import '../../../driver/presentation/pages/driver_home_page.dart';
 
 class HomeScaffold extends StatefulWidget {
   const HomeScaffold({super.key});
@@ -35,7 +40,10 @@ class _HomeScaffoldState extends State<HomeScaffold> {
   late ReservationsBloc reservationsBloc;
   late UserInfoBloc userInfoBloc;
   late TravelsBloc travelsBloc;
+  DriverTripsBloc? driverTripsBloc;
+  TicketScannerBloc? ticketScannerBloc;
   String? _userId;
+  bool _isDriver = false;
 
   @override
   void initState() {
@@ -66,6 +74,21 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     }
     userInfoBloc.add(const FetchUserInfo());
     travelsBloc.add(const FetchTravels());
+    _checkIfDriver();
+  }
+
+  Future<void> _checkIfDriver() async {
+    final roles = await SessionManager.getUserRoles();
+    
+    setState(() {
+      _isDriver = roles?.contains('Conductor') ?? false;
+    });
+    
+    if (_isDriver) {
+      driverTripsBloc = sl<DriverTripsBloc>();
+      ticketScannerBloc = sl<TicketScannerBloc>();
+      driverTripsBloc!.add(LoadAssignedTripsEvent());
+    }
   }
 
   @override
@@ -73,6 +96,8 @@ class _HomeScaffoldState extends State<HomeScaffold> {
     reservationsBloc.close();
     userInfoBloc.close();
     travelsBloc.close();
+    driverTripsBloc?.close();
+    ticketScannerBloc?.close();
     super.dispose();
   }
 
@@ -182,6 +207,8 @@ class _HomeScaffoldState extends State<HomeScaffold> {
         travelsBloc.add(const FetchTravels());
       } else if (index == 2) {
         userInfoBloc.add(const FetchUserInfo());
+      } else if (index == 3 && _isDriver) {
+        driverTripsBloc?.add(LoadAssignedTripsEvent());
       }
     });
   }
@@ -329,7 +356,9 @@ class _HomeScaffoldState extends State<HomeScaffold> {
             )
           : _currentIndex == 1
               ? _buildTravelsPage()
-              : _buildProfilePage(),
+              : _currentIndex == 2
+                  ? _buildProfilePage()
+                  : _buildDriverPage(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -339,10 +368,12 @@ class _HomeScaffoldState extends State<HomeScaffold> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         backgroundColor: Theme.of(context).colorScheme.surface,
-        items: const [
+        items: [
           BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Reservas'),
           BottomNavigationBarItem(icon: Icon(Icons.flight_takeoff), label: 'Viajes'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          if (_isDriver)
+            BottomNavigationBarItem(icon: Icon(Icons.local_shipping), label: 'Conductor'),
         ],
       ),
     );
@@ -355,9 +386,24 @@ class _HomeScaffoldState extends State<HomeScaffold> {
       case 1:
         return 'Viajes';
       case 2:
-        return 'Perfil';
+        return 'Conductor';
+      case 3:
+        return 'Conductor';
       default:
         return 'SRT';
     }
+  }
+
+  Widget _buildDriverPage() {
+    if (driverTripsBloc == null || ticketScannerBloc == null) {
+      return Center(child: Text('No disponible'));
+    }
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<DriverTripsBloc>.value(value: driverTripsBloc!),
+        BlocProvider<TicketScannerBloc>.value(value: ticketScannerBloc!),
+      ],
+      child: DriverHomePage(),
+    );
   }
 }

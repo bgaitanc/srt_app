@@ -14,4 +14,9 @@ class ApiEndpoints {
   // Travels endpoints
   static const String travels = '/travels/all';
   static const String createTravel = '/travels/create';
+
+  // Driver endpoints
+  static const String driverTripsAssigned = '/drivertrips/assigned';
+  static const String validateTicket = '/reservations/validate';
+  static String completeTripById(String travelId) => '/drivertrips/$travelId/complete';
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionManager {
@@ -46,5 +47,51 @@ class SessionManager {
   @Deprecated('Use clearSession() instead')
   static Future<void> clearToken() async {
     await clearSession();
+  }
+
+  static Future<List<String>?> getUserRoles() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) return null;
+
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+
+      final payload = parts[1];
+      final normalized = base64.normalize(payload);
+      final decoded = utf8.decode(base64.decode(normalized));
+      final json = jsonDecode(decoded) as Map<String, dynamic>;
+
+      final possibleKeys = [
+        'role',
+        'roles', 
+        'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
+      ];
+
+      for (final key in possibleKeys) {
+        if (json.containsKey(key)) {
+          final roleValue = json[key];
+          
+          if (roleValue is List) {
+            return roleValue.cast<String>();
+          } else if (roleValue is String) {
+            if (roleValue.startsWith('[') && roleValue.endsWith(']')) {
+              try {
+                final parsed = jsonDecode(roleValue);
+                if (parsed is List) {
+                  return parsed.cast<String>();
+                }
+              } catch (e) {
+              }
+            }
+            return [roleValue];
+          }
+        }
+      }
+
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }
